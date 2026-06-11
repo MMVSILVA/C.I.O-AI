@@ -1,0 +1,8 @@
+{
+  "name": "Firjan IA",
+  "description": "Plataforma de Inteligência Artificial do Sistema Firjan - Centralização corporativa de conhecimento, cooperação de setores e assistente inteligente.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
