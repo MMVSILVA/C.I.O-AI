@@ -79,40 +79,100 @@ let sectors: Sector[] = [
     id: "sec-dir",
     name: "Diretoria Geral",
     responsible: "Renato Albuquerque",
-    roleDescription: "Administração estratégica, governança corporativa e expansão.",
+    roleDescription: "Administração estratégica, governança corporativa e expansão do Sistema Firjan.",
     email: "diretoria@firjan.com.br",
-    connections: ["sec-ti", "sec-rh", "sec-fin"],
+    connections: ["sec-ti", "sec-rh", "sec-fin", "sec-dec", "sec-ddi"],
     size: 5
   },
   {
     id: "sec-ti",
-    name: "Tecnologia da Informação",
+    name: "Tecnologia da Informação (DTI)",
     responsible: "Carlos Henrique",
-    roleDescription: "Infraestrutura de nuvem, segurança corporativa, desenvolvimento e suporte.",
+    roleDescription: "Infraestrutura de nuvem, segurança corporativa, desenvolvimento e suporte tecnológico para o Sistema Firjan.",
     parentId: "sec-dir",
-    connections: ["sec-rh", "sec-fin"],
+    connections: ["sec-rh", "sec-fin", "sec-ist"],
     email: "ti@firjan.com.br",
     size: 24
   },
   {
     id: "sec-rh",
-    name: "Recursos Humanos (Gente & Gestão)",
+    name: "Gente & Recursos Humanos (DHR)",
     responsible: "Mariana Costa",
-    roleDescription: "Onboarding, recrutamento, capacitação profissional e plano de cargos.",
+    roleDescription: "Gestão operacional de pessoas, integração de novatos (onboarding), capacitação continuada e planos de carreira.",
     parentId: "sec-dir",
-    connections: ["sec-ti"],
+    connections: ["sec-ti", "sec-geb", "sec-dep"],
     email: "rh@firjan.com.br",
     size: 12
   },
   {
     id: "sec-fin",
-    name: "Financeiro & Contas",
+    name: "Financeiro & Custos (DFI)",
     responsible: "Claudio Guedes",
-    roleDescription: "Controle de despesas, faturamento, reembolso de viagens e auditoria fiscal.",
+    roleDescription: "Controle orçamentário, prestação de contas, faturamento, auditoria fiscal e reembolso de viagens corporativas.",
     parentId: "sec-dir",
     connections: ["sec-ti", "sec-dir"],
     email: "financeiro@firjan.com.br",
     size: 8
+  },
+  {
+    id: "sec-dec",
+    name: "Departamento de Inteligência Industrial (DEC)",
+    responsible: "Juliana Mendes",
+    roleDescription: "Estudos econômicos, levantamento de índices industriais, pesquisas do estado do RJ e sondagens setoriais.",
+    parentId: "sec-dir",
+    connections: ["sec-dir", "sec-ddi"],
+    email: "dec@firjan.com.br",
+    size: 14
+  },
+  {
+    id: "sec-ddi",
+    name: "Defesa de Interesses Industriais (DDI)",
+    responsible: "Rodrigo Carvalho",
+    roleDescription: "Representatividade empresarial, articulação com órgãos públicos, fomento da sustentabilidade e defesa de interesses da indústria.",
+    parentId: "sec-dir",
+    connections: ["sec-dir", "sec-dec"],
+    email: "ddi@firjan.com.br",
+    size: 10
+  },
+  {
+    id: "sec-geb",
+    name: "Educação Básica (SESI - GEB)",
+    responsible: "Ana Teresa Vieira",
+    roleDescription: "Gerência geral escolar da rede de Escolas SESI, voltada ao ensino fundamental, médio e desenvolvimento socioeducativo.",
+    parentId: "sec-rh",
+    connections: ["sec-rh", "sec-sst", "sec-dep"],
+    email: "educacao-sesi@firjan.com.br",
+    size: 45
+  },
+  {
+    id: "sec-sst",
+    name: "Saúde Ocupacional & Segurança (SESI - SST)",
+    responsible: "Dr. Marcelo Neves",
+    roleDescription: "Serviços em segurança e saúde do trabalho (SST) para as indústrias associadas e colaboradores internos.",
+    parentId: "sec-rh",
+    connections: ["sec-rh", "sec-geb"],
+    email: "sst-sesi@firjan.com.br",
+    size: 30
+  },
+  {
+    id: "sec-ist",
+    name: "Institutos SENAI de Tecnologia (SENAI - IST)",
+    responsible: "Eng. Patricia Souza",
+    roleDescription: "P&D, consultoria técnica especializada e ensaios laboratoriais metrológicos focados na competitividade da indústria.",
+    parentId: "sec-ti",
+    connections: ["sec-ti", "sec-dep"],
+    email: "ist-senai@firjan.com.br",
+    size: 28
+  },
+  {
+    id: "sec-dep",
+    name: "Educação Profissional (SENAI - DEP)",
+    responsible: "Prof. Marcos Andrade",
+    roleDescription: "Direcionamento pedagógico de cursos técnicos de aprendizagem profissional e industrial para jovens e adultos do RJ.",
+    parentId: "sec-rh",
+    connections: ["sec-rh", "sec-geb", "sec-ist"],
+    email: "aprendizagem-senai@firjan.com.br",
+    size: 50
   }
 ];
 

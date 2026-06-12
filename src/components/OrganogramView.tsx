@@ -85,9 +85,9 @@ export default function OrganogramView({ sectors }: OrganogramViewProps) {
               <div className="w-0.5 h-6 bg-slate-200" />
             </div>
 
-        {/* Level 2: Sub-Departments in a grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {sectors.filter(s => s.parentId === "sec-dir").map(sub => (
+        {/* Level 2 & 3 Operational Sectors in an elegant grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto pr-1">
+              {sectors.filter(s => s.parentId).map(sub => (
                 <motion.button
                   key={sub.id}
                   whileHover={{ scale: 1.02 }}

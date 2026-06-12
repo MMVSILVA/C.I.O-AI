@@ -367,6 +367,35 @@ export default function DashboardView({ user, sectors, documents, articles, setV
 
       </div>
 
+      {/* External Portals & Carreira quick navigation links */}
+      <div className={`p-5 rounded-2xl border ${cardBgAndBorder} flex flex-col md:flex-row justify-between items-center gap-4`} id="dashboard-external-links-panel">
+        <div className="text-left">
+          <span className="text-[9px] font-mono tracking-widest font-black text-[#003BD1] uppercase block mb-0.5">
+            🌍 Portais Oficiais Corporativos & Carreiras
+          </span>
+          <h4 className="text-sm font-extrabold tracking-tight">Oportunidades de Vagas & Sites Sistêmicos</h4>
+          <p className="text-[11px] text-slate-500 mt-1">Consulte o painel de empregos institucional do i-Hunter e a central informativa principal da Firjan.</p>
+        </div>
+        <div className="flex gap-3 w-full md:w-auto shrink-0 select-none">
+          <a
+            href="https://jobs.i-hunter.com/firjan/oportunidades"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 md:flex-none px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-[#003BD1] hover:text-[#003BD1] text-xs font-bold text-slate-705 flex items-center justify-center gap-1.5 shadow-3xs transition-all text-center whitespace-nowrap"
+          >
+            📂 Vagas de Emprego (i-Hunter) ↗
+          </a>
+          <a
+            href="https://firjan.com.br/pagina-inicial.htm"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 md:flex-none px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-[#003BD1] hover:text-[#003BD1] text-xs font-bold text-slate-705 flex items-center justify-center gap-1.5 shadow-3xs transition-all text-center whitespace-nowrap"
+          >
+            🏢 Portal Firjan Oficial ↗
+          </a>
+        </div>
+      </div>
+
       {/* Institutional Activity Log Feed */}
       <div className={`p-6 rounded-2xl border ${cardBgAndBorder}`} id="dashboard-activity-feed">
         <div className="flex justify-between items-center mb-4">

@@ -11,7 +11,12 @@ import {
   Paperclip,
   RotateCcw,
   BookOpen,
-  CloudLightning
+  CloudLightning,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  AudioLines
 } from "lucide-react";
 import { ChatMessage, UserProfile } from "../types";
 
@@ -26,6 +31,12 @@ export default function ChatView({ user }: ChatViewProps) {
   const [trainingFile, setTrainingFile] = useState<{ name: string; size: string } | null>(null);
   const [trainingProgress, setTrainingProgress] = useState(0);
   const [isTraining, setIsTraining] = useState(false);
+
+  // Web Speech API states
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
 
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +63,48 @@ export default function ChatView({ user }: ChatViewProps) {
 
   useEffect(() => {
     fetchHistory();
+
+    // Check Speech Recognition support in current browser (Web Speech API)
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+      const rec = new SpeechRecognition();
+      rec.continuous = false; // Stop listening automatically when active speech ends
+      rec.interimResults = false;
+      rec.lang = "pt-BR"; // Target pt-BR since C.I.O and onboarding is Portuguese
+
+      rec.onstart = () => {
+        setIsListening(true);
+      };
+
+      rec.onend = () => {
+        setIsListening(false);
+      };
+
+      rec.onerror = (event: any) => {
+        console.error("Erro no reconhecimento de fala:", event);
+        setIsListening(false);
+      };
+
+      rec.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript && transcript.trim()) {
+          setInput(prev => {
+            const base = prev.trim();
+            return base ? `${base} ${transcript}` : transcript;
+          });
+        }
+      };
+
+      recognitionRef.current = rec;
+    }
+
+    return () => {
+      // Clean up speech synthesis on leave
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
 
   // Sync scroll on new messages
@@ -61,12 +114,75 @@ export default function ChatView({ user }: ChatViewProps) {
     }
   }, [messages, loading, isTraining]);
 
+  const toggleListening = () => {
+    if (!speechSupported || !recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        // Cancel active browser speaking to prevent feedback loops
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+          setSpeakingMsgId(null);
+        }
+        recognitionRef.current.start();
+      } catch (e) {
+        console.error("Não foi possível iniciar o microfone:", e);
+      }
+    }
+  };
+
+  const handleSpeakMessage = (msgId: string, text: string) => {
+    if (!("speechSynthesis" in window)) return;
+
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+    } else {
+      window.speechSynthesis.cancel();
+
+      // Clean up markdown markers for a pure reading
+      const cleanText = text
+        .replace(/\*\*([^*]+)\*\*/g, "$1") // bold
+        .replace(/\*([^*]+)\*/g, "$1") // italic
+        .replace(/#[#]*\s/g, "") // headings
+        .replace(/`([^`]+)`/g, "$1"); // inline snippets
+
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = "pt-BR";
+
+      // Select adequate Portuguese voice if it exists
+      const voices = window.speechSynthesis.getVoices();
+      const ptVoice = voices.find(v => v.lang.startsWith("pt"));
+      if (ptVoice) {
+        utterance.voice = ptVoice;
+      }
+
+      utterance.onend = () => {
+        setSpeakingMsgId(null);
+      };
+      utterance.onerror = () => {
+        setSpeakingMsgId(null);
+      };
+
+      setSpeakingMsgId(msgId);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
   const handleSendMessage = async (textToSend: string) => {
     if (!textToSend.trim() || loading) return;
 
     const userText = textToSend;
     setInput("");
     setLoading(true);
+
+    // Stop speaking if new user message is sent
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+    }
 
     // Optimistically insert user's message
     const tempUserMsg: ChatMessage = {
@@ -105,6 +221,11 @@ export default function ChatView({ user }: ChatViewProps) {
 
   const handleResetChat = async () => {
     try {
+      // Cancel speech synthesis on reset
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        setSpeakingMsgId(null);
+      }
       const response = await fetch("/api/chat/reset", { method: "POST" });
       const data = await response.json();
       if (data.success) {
@@ -120,6 +241,12 @@ export default function ChatView({ user }: ChatViewProps) {
   const handleUploadSimulate = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Cancel speech synthesis on simulation start
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+    }
 
     setTrainingFile({ name: file.name, size: (file.size / 1024 / 1024).toFixed(2) + " MB" });
     setIsTraining(true);
@@ -145,7 +272,7 @@ export default function ChatView({ user }: ChatViewProps) {
             setMessages(prevChat => [...prevChat, {
               id: `train-${Date.now()}`,
               role: "model",
-              text: `💡 **[Firjan IA Base Cognitiva Atualizada com Sucesso]** Sincronizei e concluí o OCR do documento **"${file.name}"**. Os novos conceitos foram catalogados e estão disponíveis para consultas automáticas via RAG a partir de agora! Pode fazer perguntas relacionadas ao seu texto.`,
+              text: `💡 **[Firjan IA Base Cognitiva Sincronizada]** Concluí o processamento OCR do documento corporativo **"${file.name}"**. Conceitos mapeados e disponíveis para consultas estruturadas via RAG a partir de agora!`,
               timestamp: new Date().toISOString()
             }]);
             setIsTraining(false);
@@ -173,8 +300,8 @@ export default function ChatView({ user }: ChatViewProps) {
               <Sparkles className="w-4.5 h-4.5 text-amber-500" />
             </h2>
             <p className="text-[10px] text-slate-500 font-mono flex items-center gap-1 font-bold">
-              <span className="w-1.5 h-1.5 bg-[#003BD1] rounded-full" />
-              Modelo: Gemini 3.5-Flash RAG Ativo
+              <span className="w-1.5 h-1.5 bg-[#003BD1] rounded-full animate-pulse" />
+              Modelo: Gemini 3.5-Flash RAG Ativo {speechSupported && "• Voz Disponível"}
             </p>
           </div>
         </div>
@@ -207,15 +334,38 @@ export default function ChatView({ user }: ChatViewProps) {
               }`}
             >
               {/* Message Meta Info */}
-              <div className={`flex items-center gap-2 mb-2 text-[10px] font-mono justify-between ${msg.role === 'user' ? 'text-[#003BD1]/80' : 'text-slate-400'}`}>
+              <div className={`flex items-center gap-4 mb-2 text-[10px] font-mono justify-between ${msg.role === 'user' ? 'text-[#003BD1]/80' : 'text-slate-400'}`}>
                 <span className="font-extrabold uppercase tracking-wide flex items-center gap-1">
                   {msg.role === 'user' ? "Você (Funcionário)" : "Firjan IA Assistente"}
                 </span>
-                <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                
+                <div className="flex items-center gap-2">
+                  {msg.role === 'model' && (
+                    <button
+                      type="button"
+                      onClick={() => handleSpeakMessage(msg.id, msg.text)}
+                      className="p-1 px-2 hover:bg-slate-100 rounded text-slate-500 hover:text-[#003BD1] transition-all cursor-pointer flex items-center gap-1 border border-slate-150 bg-slate-50 animate-fade-in"
+                      title="Ouvir resposta sintetizada de voz"
+                    >
+                      {speakingMsgId === msg.id ? (
+                        <>
+                          <VolumeX className="w-3 h-3 text-rose-500 animate-pulse" />
+                          <span className="text-[9px] text-rose-500 font-bold uppercase font-mono">Parar</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-3 h-3 text-slate-505" />
+                          <span className="text-[9px] font-bold uppercase font-mono">Ouvir</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                  <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
               </div>
 
               {/* Msg Content */}
-              <div className="whitespace-pre-wrap text-sm leading-relaxed">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed select-text font-sans">
                 {msg.text}
               </div>
 
@@ -242,11 +392,11 @@ export default function ChatView({ user }: ChatViewProps) {
         {/* Training dynamic loaders */}
         {isTraining && (
           <div className="flex justify-start">
-            <div className="bg-white border border-emerald-200 rounded-2xl p-4 max-w-sm space-y-2 shadow-sm">
+            <div className="bg-white border border-emerald-250 rounded-2xl p-4 max-w-sm space-y-2 shadow-sm">
               <div className="flex justify-between text-xs font-mono">
                 <span className="text-emerald-600 animate-pulse flex items-center gap-1.5 font-bold">
                   <CloudLightning className="w-4 h-4 text-emerald-500" />
-                  Minerando OCR Corporativo Inteligente...
+                  Minerando OCR Corporativo ...
                 </span>
                 <span className="text-slate-600">{trainingProgress}%</span>
               </div>
@@ -262,10 +412,10 @@ export default function ChatView({ user }: ChatViewProps) {
         {loading && (
           <div className="flex justify-start">
             <div className="bg-white border border-slate-200 rounded-2xl p-4 w-48 text-center text-xs font-mono text-slate-500 flex items-center justify-center gap-2 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" />
+              <span className="w-2 h-2 rounded-full bg-[#003BD1] animate-bounce animate-pulse" />
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:0.2s]" />
-              <span className="w-2 h-2 rounded-full bg-blue-300 animate-bounce [animation-delay:0.4s]" />
-              Gerando resposta...
+              <span className="w-2 h-2 rounded-full bg-blue-305 animate-bounce [animation-delay:0.4s]" />
+              Sincronizando IA ...
             </div>
           </div>
         )}
@@ -276,17 +426,17 @@ export default function ChatView({ user }: ChatViewProps) {
         <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-100 mb-4 shrink-0 shadow-xs">
           <p className="text-xs font-sans text-[#003BD1] mb-2.5 flex items-center gap-1.5 font-bold">
             <HelpCircle className="w-4 h-4 text-[#003BD1]" />
-            Para começar, clique em uma das sugestões ou faça perguntas sobre a Firjan 2026:
+            Para começar, clique em uma das sugestões ou faça perguntas sobre o onboarding:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
             {initialSuggestions.map((sug, i) => (
               <button
                 key={i}
                 onClick={() => handleSendMessage(sug)}
-                className="text-left py-2.5 px-3.5 rounded-xl bg-white border border-slate-200 hover:border-[#003BD1] hover:text-[#003BD1] text-slate-700 transition-all cursor-pointer flex items-center justify-between font-medium shadow-2xs"
+                className="text-left py-2.5 px-3.5 rounded-xl bg-white border border-slate-200 hover:border-[#003BD1] hover:text-[#003BD1] text-slate-700 transition-all cursor-pointer flex items-center justify-between font-medium shadow-2xs text-[11px]"
               >
                 <span>{sug}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 hover:text-[#003BD1]" />
               </button>
             ))}
           </div>
@@ -299,7 +449,7 @@ export default function ChatView({ user }: ChatViewProps) {
         className="flex gap-2.5 items-center bg-white p-3 rounded-2xl border border-slate-200 shrink-0 shadow-sm"
       >
         {/* Document attachment integration */}
-        <label className="p-2.5 rounded-xl border border-slate-250 hover:border-slate-350 hover:bg-slate-50 text-slate-550 transition-all cursor-pointer">
+        <label className="p-2.5 rounded-xl border border-slate-250 hover:border-slate-350 hover:bg-slate-50 text-slate-550 transition-all cursor-pointer" title="Anexar documento PDF/DOCX">
           <Paperclip className="w-4.5 h-4.5" />
           <input 
             type="file" 
@@ -309,12 +459,49 @@ export default function ChatView({ user }: ChatViewProps) {
           />
         </label>
 
+        {/* Voice command microphone button (Web Speech API) */}
+        {speechSupported ? (
+          <button
+            type="button"
+            onClick={toggleListening}
+            className={`p-2.5 rounded-xl border transition-all cursor-pointer relative flex items-center justify-center ${
+              isListening 
+                ? "bg-rose-50 border-rose-300 text-rose-600 shadow-xs ring-2 ring-rose-300 animate-pulse" 
+                : "border-slate-250 hover:border-slate-350 hover:bg-slate-50 text-slate-550"
+            }`}
+            title={isListening ? "Parar de ouvir (Microfone ativo)" : "Falar comando de voz (Speech-to-Text)"}
+          >
+            {isListening ? (
+              <MicOff className="w-4.5 h-4.5 text-rose-600" />
+            ) : (
+              <Mic className="w-4.5 h-4.5 text-slate-500" />
+            )}
+            
+            {/* Ambient indicator of speaking visual feedback */}
+            {isListening && (
+              <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+              </span>
+            )}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="p-2.5 rounded-xl border border-slate-200 opacity-40 cursor-not-allowed text-slate-400"
+            disabled
+            title="Reconhecimento de fala indisponível no navegador atual"
+          >
+            <MicOff className="w-4.5 h-4.5" />
+          </button>
+        )}
+
         <input 
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Pergunte ao Firjan IA... (ex: Qual o prazo da Firjan ou MFA?)"
-          className="flex-1 bg-transparent py-2 px-1 focus:outline-none text-sm text-slate-800 placeholder-slate-400"
+          placeholder={isListening ? "Ouvindo... Fale sua dúvida sobre a Firjan agora!" : "Pergunte ao Firjan IA... (ou fale pelo microfone)"}
+          className="flex-1 bg-transparent py-2 px-1 focus:outline-none text-sm text-slate-850 placeholder-slate-400"
           disabled={loading || isTraining}
         />
 
