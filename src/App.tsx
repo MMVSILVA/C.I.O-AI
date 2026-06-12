@@ -40,16 +40,209 @@ import AdminView from "./components/AdminView";
 import ProfileView from "./components/ProfileView";
 import AppLogo from "./components/AppLogo";
 
+const DEFAULT_SECTORS: Sector[] = [
+  {
+    id: "sec-dir",
+    name: "Diretoria Geral",
+    responsible: "Renato Albuquerque",
+    roleDescription: "Administração estratégica, governança corporativa e expansão do Sistema Firjan.",
+    email: "diretoria@firjan.com.br",
+    connections: ["sec-ti", "sec-rh", "sec-fin", "sec-dec", "sec-ddi"],
+    size: 5
+  },
+  {
+    id: "sec-ti",
+    name: "Tecnologia da Informação (DTI)",
+    responsible: "Carlos Henrique",
+    roleDescription: "Infraestrutura de nuvem, segurança corporativa, desenvolvimento e suporte tecnológico para o Sistema Firjan.",
+    parentId: "sec-dir",
+    connections: ["sec-rh", "sec-fin", "sec-ist"],
+    email: "ti@firjan.com.br",
+    size: 24
+  },
+  {
+    id: "sec-rh",
+    name: "Gente & Recursos Humanos (DHR)",
+    responsible: "Mariana Costa",
+    roleDescription: "Gestão operacional de pessoas, integração de novatos (onboarding), capacitação continuada e planos de carreira.",
+    parentId: "sec-dir",
+    connections: ["sec-ti", "sec-geb", "sec-dep"],
+    email: "rh@firjan.com.br",
+    size: 12
+  },
+  {
+    id: "sec-fin",
+    name: "Financeiro & Custos (DFI)",
+    responsible: "Claudio Guedes",
+    roleDescription: "Controle orçamentário, prestação de contas, faturamento, auditoria fiscal e reembolso de viagens corporativas.",
+    parentId: "sec-dir",
+    connections: ["sec-ti", "sec-dir"],
+    email: "financeiro@firjan.com.br",
+    size: 8
+  },
+  {
+    id: "sec-dec",
+    name: "Departamento de Inteligência Industrial (DEC)",
+    responsible: "Juliana Mendes",
+    roleDescription: "Estudos econômicos, levantamento de índices industriais, pesquisas do estado do RJ e sondagens setoriais.",
+    parentId: "sec-dir",
+    connections: ["sec-dir", "sec-ddi"],
+    email: "dec@firjan.com.br",
+    size: 14
+  },
+  {
+    id: "sec-ddi",
+    name: "Defesa de Interesses Industriais (DDI)",
+    responsible: "Rodrigo Carvalho",
+    roleDescription: "Representatividade empresarial, articulação com órgãos públicos, fomento da sustentabilidade e defesa de interesses da indústria.",
+    parentId: "sec-dir",
+    connections: ["sec-dir", "sec-dec"],
+    email: "ddi@firjan.com.br",
+    size: 10
+  },
+  {
+    id: "sec-geb",
+    name: "Educação Básica (SESI - GEB)",
+    responsible: "Ana Teresa Vieira",
+    roleDescription: "Gerência geral escolar da rede de Escolas SESI, voltada ao ensino fundamental, médio e desenvolvimento socioeducativo.",
+    parentId: "sec-rh",
+    connections: ["sec-rh", "sec-sst", "sec-dep"],
+    email: "educacao-sesi@firjan.com.br",
+    size: 45
+  },
+  {
+    id: "sec-sst",
+    name: "Saúde Ocupacional & Segurança (SESI - SST)",
+    responsible: "Dr. Marcelo Neves",
+    roleDescription: "Serviços em segurança e saúde do trabalho (SST) para as indústrias associadas e colaboradores internos.",
+    parentId: "sec-rh",
+    connections: ["sec-rh", "sec-geb"],
+    email: "sst-sesi@firjan.com.br",
+    size: 30
+  },
+  {
+    id: "sec-ist",
+    name: "Institutos SENAI de Tecnologia (SENAI - IST)",
+    responsible: "Eng. Patricia Souza",
+    roleDescription: "P&D, consultoria técnica especializada e ensaios laboratoriais metrológicos focados na competitividade da indústria.",
+    parentId: "sec-ti",
+    connections: ["sec-ti", "sec-dep"],
+    email: "ist-senai@firjan.com.br",
+    size: 28
+  },
+  {
+    id: "sec-dep",
+    name: "Educação Profissional (SENAI - DEP)",
+    responsible: "Prof. Marcos Andrade",
+    roleDescription: "Direcionamento pedagógico de cursos técnicos de aprendizagem profissional e industrial para jovens e adultos do RJ.",
+    parentId: "sec-rh",
+    connections: ["sec-rh", "sec-geb", "sec-ist"],
+    email: "aprendizagem-senai@firjan.com.br",
+    size: 50
+  }
+];
+
+const DEFAULT_DOCUMENTS: DocumentMeta[] = [
+  {
+    id: "doc-1",
+    filename: "regulamento_premio_sustentabilidade_2026.pdf",
+    title: "Regulamento Oficial Prêmio Firjan de Sustentabilidade 2026",
+    fileSize: "14.2 MB",
+    uploadedAt: "2026-06-02T22:15:00Z",
+    uploadedBy: "Renato Albuquerque",
+    sectorId: "sec-dir",
+    tags: ["Firjan", "Sustentabilidade", "ESG", "Regulamento"],
+    status: "Processed",
+    version: 1,
+    category: "Regulamentos",
+    ocrText: "PRÊMIO FIRJAN DE SUSTENTABILIDADE 2026. Edital completo para inscrição de projetos do Rio de Janeiro. Inscrições prorrogadas até 02/06/2026 às 23h59. Categorias: Água, Resíduos Sólidos, Governança Corporativa, ODS, Mudanças Climáticas. Arquivo digital PDF max 30MB, max 40 páginas. Enviar para premiosustentabilidade@firjan.com.br"
+  },
+  {
+    id: "doc-2",
+    filename: "manual_onboarding_firjan_ia.pdf",
+    title: "Manual de Boas-Vindas e Onboarding Tecnológico Firjan IA",
+    fileSize: "4.8 MB",
+    uploadedAt: "2026-06-01T11:30:00Z",
+    uploadedBy: "Mariana Costa",
+    sectorId: "sec-rh",
+    tags: ["Onboarding", "Boas-Vindas", "Cultura"],
+    status: "Processed",
+    version: 1,
+    category: "Manuais",
+    ocrText: "BEM-VINDO À PLATAFORMA FIRJAN IA. Este manual ensina a usar a nossa base de conhecimento institucional, cadastrar seu perfil, requisitar ajuda do assistente de inteligência artificial do Sistema, acompanhar trilhas de integração e compreender o organograma interativo."
+  },
+  {
+    id: "doc-3",
+    filename: "normativa_seguranca_mfa_v3.pdf",
+    title: "Normativa Interna de Segurança: Autenticação MFA e Contas",
+    fileSize: "2.1 MB",
+    uploadedAt: "2026-05-20T10:00:00Z",
+    uploadedBy: "Carlos Henrique",
+    sectorId: "sec-ti",
+    tags: ["Segurança", "MFA", "TI", "Normativa"],
+    status: "Processed",
+    version: 3,
+    category: "Normativo",
+    ocrText: "NORMATIVA TI 03/2026: É obrigatório o uso de autenticação de múltiplos fatores (MFA) por todos os administradores e colaboradores em até 48 horas de admissão no portal Firjan IA. Incidentes reportar a dpo@firjan.com.br"
+  }
+];
+
+const DEFAULT_ARTICLES: WikiArticle[] = [
+  {
+    id: "wiki-lgpd",
+    title: "Diretrizes de Proteção de Dados e LGPD",
+    content: `### 1. Introdução à LGPD no Ambiente Corporativo\nTodos os colaboradores são guardiões das informações e dos dados pessoais tratados pela Firjan IA. Conforme a Lei Geral de Proteção de Dados (LGPD), todas as bases que contenham nomes, e-mails, salários ou CPF devem ser protegidas rigorosamente.\n\n### 2. Normas de Segurança Cruciais\n* **Ativação de MFA:** É obrigatório habilitar a Autenticação de Múltiplos Fatores (MFA) no portal Firjan IA em até 48 horas após ingressar no Sistema.\n* **Senhas:** Nunca reutilize senhas pessoais para ferramentas corporativas.\n* **Compartilhamento:** Fica estritamente proibido o compartilhamento de logins de acesso ou transferência de relatórios contendo dados pessoais por canais informais de comunicação (como WhatsApp, e-mails não corporativos ou serviços de arquivos públicos).\n\n### 3. Em Caso de Incidentes:\nQualquer suspeita de vazamento, perda de equipamento corporativo ou acesso não autorizado deve ser reportado de imediato à equipe de TI e ao DPO através do e-mail oficial: **dpo@firjan.com.br**..`,
+    author: "Carlos Henrique",
+    sectorId: "sec-ti",
+    createdAt: "2026-05-10T14:30:00Z",
+    updatedAt: "2026-06-01T10:00:00Z",
+    version: 2,
+    status: "Approved",
+    tags: ["LGPD", "Segurança", "Privacidade", "TI"],
+    comments: [
+      { id: "c1", authorName: "Mariana Costa", text: "Excelente resumo de conformidade. Todas as novas integrações do RH agora incluem leitura obrigatória deste artigo.", createdAt: "2026-05-12T09:15:00Z" }
+    ]
+  },
+  {
+    id: "wiki-viagem",
+    title: "Procedimento para Reembolsos de Despesas e Viagens",
+    content: `### Manual de Reembolso de Viagens Corporativas\nO objetivo deste documento é normatizar os gastos extraordinários cometidos a serviço da instituição.\n\n### 1. Prazos para Submissão\nO colaborador deve abrir a solicitação de reembolso no módulo financeiro em até **5 dias úteis** contados a partir da data de regresso da viagem. Toda submissão deve anexar fotos legíveis ou PDFs das notas fiscais válidas.\n\n### 2. Limites Diários Toleráveis:\n* **Alimentação Completa:** Limite máximo diário de **R$ 80,00** (não reembolsáveis bebidas alcoólicas).\n* **Transporte Individual (Aplicativos):** Cobertura integral desde que devidamente justificada a origem e destino associados ao trabalho corporativo.\n* **Deslocamento com Veículo Próprio:** Valor de reembolso calculado em **R$ 1,10 por quilômetro rodado**, exigindo envio do mapa do trajeto ou comprovação de quilometragem inicial e final.\n\n### 3. Fluxo de Autorizações\nO reembolso passará por ocorrência de conferência do setor de Recursos Humanos, seguida de validação final pelo Gestor do Setor. O pagamento é liquidado tradicionalmente na folha subsequente ou no segundo ciclo contábil do mês corrente.`,
+    author: "Claudio Guedes",
+    sectorId: "sec-fin",
+    createdAt: "2026-04-18T09:00:00Z",
+    updatedAt: "2026-04-18T09:00:00Z",
+    version: 1,
+    status: "Approved",
+    tags: ["Reembolso", "Financeiro", "Normas", "Viagens"],
+    comments: []
+  },
+  {
+    id: "wiki-premio-firjan",
+    title: "Prêmio Firjan de Sustentabilidade 2026 - Regulamento Interno",
+    content: `### Regulamento do Prêmio Firjan de Sustentabilidade 2026\nAbaixo estão destacaram-se os parâmetros regulamentares essenciais obtidos do edital institucional da Firjan.\n\n### 1. Apresentação e Elegibilidade\nO prêmio visa reconhecer iniciativas que aliem o desenvolvimento sustentável com viabilidade econômica, proteção ao meio ambiente e responsabilidade ESG. Podem concorrer **Pessoas Jurídicas** com projetos concluídos ou em fase de implantação com resultados mensuráveis obtidos nos anos de 2024 e/ou 2025.\n\n### 2. Categorias de Participação:\na) Água e Efluentes;\nb) Biodiversidade e Serviços Ecossistêmicos;\nc) Mudanças Climáticas e Transição Energética;\nd) Resíduos Sólidos;\ne) Gestão de Impacto e Investimento Social;\nf) Estratégias de Implementação dos ODS (Agenda 2030);\ng) Governança Corporativa.\n\n### 3. Prazos e Submissão:\n* **Período de Inscrição:** As inscrições iniciam em **03/03/2026** e encerram impreterivelmente às **23h59 do dia 02/06/2026** (conforme prorrogação oficial de prazo).\n* **Formato do Arquivo:** Envio em arquivo digital unificado em **PDF**, tamanho máximo **30 MB** e limite de **40 páginas**. Deverá conter obrigatoriamente: descrição de projeto, objetivos, desenvolvimento e resultados detalhados.\n* **Imagens:** Envio obrigatório de pelo menos 2 imagens legíveis do projeto para veiculação publicitária.\n* **Contatos Oficiais:** Lídia Vaz Aguiar ou Viviane Parente, pelo telefone (21) 2563-4410 ou e-mail **premiosustentabilidade@firjan.com.br**..`,
+    author: "Mariana Costa",
+    sectorId: "sec-rh",
+    createdAt: "2026-05-15T11:00:00Z",
+    updatedAt: "2026-06-02T16:00:00Z",
+    version: 2,
+    status: "Approved",
+    tags: ["Firjan", "Sustentabilidade", "ESG", "Incentivos"],
+    comments: [
+      { id: "c2", authorName: "Carlos Henrique", text: "Excelente! Esta informação é extremamente útil para orientar nossa submissão conjunta dos setores de TI e Operações.", createdAt: "2026-05-18T10:45:00Z" }
+    ]
+  }
+];
+
 export default function App() {
   const [booting, setBooting] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [view, setView] = useState<string>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Lists stored globally for synchronization
-  const [sectors, setSectors] = useState<Sector[]>([]);
-  const [documents, setDocuments] = useState<DocumentMeta[]>([]);
-  const [articles, setArticles] = useState<WikiArticle[]>([]);
+  // Lists stored globally for synchronization (preloaded with robust client fallbacks)
+  const [sectors, setSectors] = useState<Sector[]>(DEFAULT_SECTORS);
+  const [documents, setDocuments] = useState<DocumentMeta[]>(DEFAULT_DOCUMENTS);
+  const [articles, setArticles] = useState<WikiArticle[]>(DEFAULT_ARTICLES);
 
   // PWA popup state
   const [pwaInstalled, setPwaInstalled] = useState(false);
@@ -260,17 +453,39 @@ export default function App() {
     );
   };
 
-  // Fetch session on load
+  // Keep active user synchronized in localStorage for offline/static deployment resilience (e.g. Vercel)
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("cio_local_active_user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("cio_local_active_user");
+    }
+  }, [user]);
+
+  // Fetch session on load with robust localStorage fallback
   useEffect(() => {
     const fetchSession = async () => {
       try {
         const response = await fetch("/api/auth/me");
-        const data = await response.json();
-        if (data.user) {
-          setUser(data.user);
+        const contentType = response.headers.get("content-type");
+        if (response.ok && contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          if (data.user) {
+            setUser(data.user);
+          }
+        } else {
+          throw new Error("HTML response instead of JSON");
         }
       } catch (e) {
-        console.error("Modo offline ou falha ao sincronizar sessão ativa.", e);
+        console.error("Modo offline ou falha ao sincronizar sessão ativa, usando sessão local.", e);
+        const localActiveUser = localStorage.getItem("cio_local_active_user");
+        if (localActiveUser) {
+          try {
+            setUser(JSON.parse(localActiveUser));
+          } catch (err) {
+            // invalid json
+          }
+        }
       }
     };
     fetchSession();
@@ -280,16 +495,25 @@ export default function App() {
   const syncPlatformEntities = async () => {
     try {
       const resSectors = await fetch("/api/sectors");
-      const dataSectors = await resSectors.json();
-      if (dataSectors.sectors) setSectors(dataSectors.sectors);
+      const contentTypeSectors = resSectors.headers.get("content-type");
+      if (resSectors.ok && contentTypeSectors && contentTypeSectors.includes("application/json")) {
+        const dataSectors = await resSectors.json();
+        if (dataSectors.sectors) setSectors(dataSectors.sectors);
+      }
 
       const resDocs = await fetch("/api/documents");
-      const dataDocs = await resDocs.json();
-      if (dataDocs.documents) setDocuments(dataDocs.documents);
+      const contentTypeDocs = resDocs.headers.get("content-type");
+      if (resDocs.ok && contentTypeDocs && contentTypeDocs.includes("application/json")) {
+        const dataDocs = await resDocs.json();
+        if (dataDocs.documents) setDocuments(dataDocs.documents);
+      }
 
       const resWiki = await fetch("/api/wiki");
-      const dataWiki = await resWiki.json();
-      if (dataWiki.articles) setArticles(dataWiki.articles);
+      const contentTypeWiki = resWiki.headers.get("content-type");
+      if (resWiki.ok && contentTypeWiki && contentTypeWiki.includes("application/json")) {
+        const dataWiki = await resWiki.json();
+        if (dataWiki.articles) setArticles(dataWiki.articles);
+      }
     } catch (e) {
       console.error("Erro ao sincronizar entidades básicas.", e);
     }
@@ -307,6 +531,7 @@ export default function App() {
     } catch {
       // Fallback
     }
+    localStorage.removeItem("cio_local_active_user");
     setUser(null);
     setView("dashboard");
   };
