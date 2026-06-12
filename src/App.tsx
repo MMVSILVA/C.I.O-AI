@@ -18,10 +18,12 @@ import {
   GraduationCap,
   Search,
   Bell,
-  BookOpen,
-  FolderOpen,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Sun,
+  Moon,
+  Monitor,
+  HelpCircle
 } from "lucide-react";
 
 import { UserProfile, Sector, DocumentMeta, WikiArticle } from "./types";
@@ -36,6 +38,7 @@ import DocsView from "./components/DocsView";
 import OnboardingView from "./components/OnboardingView";
 import AdminView from "./components/AdminView";
 import ProfileView from "./components/ProfileView";
+import AppLogo from "./components/AppLogo";
 
 export default function App() {
   const [booting, setBooting] = useState(true);
@@ -52,6 +55,76 @@ export default function App() {
   const [pwaInstalled, setPwaInstalled] = useState(false);
   const [showPwaBanner, setShowPwaBanner] = useState(true);
 
+  // Device UI mode layout toggle: "web" full responsive design vs "app" polished native mobile mockup
+  const [deviceMode, setDeviceMode] = useState<"web" | "app">("web");
+
+  // Global theme switcher persisted in localStorage (Firjan slate dark theme vs clean high contrast light theme)
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    return (localStorage.getItem("cio-theme") as "light" | "dark") || "light";
+  });
+
+  // Interactive Guided Tour onboarding steps state
+  const [tourActive, setTourActive] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+
+  // Apply theme classes and state persistence
+  useEffect(() => {
+    localStorage.setItem("cio-theme", theme);
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  // Launch interactive tour if user logged in for the first time
+  useEffect(() => {
+    if (user) {
+      const isAlreadyCompleted = localStorage.getItem("cio-tour-completed");
+      if (!isAlreadyCompleted) {
+        // Delayed launch to ensure rendering completes seamlessly
+        const tourTimer = setTimeout(() => {
+          setTourActive(true);
+          setTourStep(0);
+          setView("dashboard"); // Force dashboard to ensure assets are mounted
+        }, 1200);
+        return () => clearTimeout(tourTimer);
+      }
+    }
+  }, [user]);
+
+  // Track the targeted elements' dimensions dynamically for contextual tour Tooltip alignment
+  useEffect(() => {
+    if (tourActive) {
+      let activeElementId = "";
+      if (tourStep === 0) activeElementId = "tour-search";
+      else if (tourStep === 1) activeElementId = "tour-navigation";
+      else if (tourStep === 2) activeElementId = "tour-gamification";
+
+      const updatePosition = () => {
+        const el = document.getElementById(activeElementId);
+        if (el) {
+          setTargetRect(el.getBoundingClientRect());
+        } else {
+          setTargetRect(null); // Fallback to centered popover overlay if screen space is too cramped (e.g. mobile hidden search)
+        }
+      };
+
+      updatePosition();
+      // Schedule ref update on resize or viewport offsets changes
+      window.addEventListener("resize", updatePosition);
+      const posTimer = setTimeout(updatePosition, 320); // allow transitions to end
+
+      return () => {
+        window.removeEventListener("resize", updatePosition);
+        clearTimeout(posTimer);
+      };
+    } else {
+      setTargetRect(null);
+    }
+  }, [tourActive, tourStep, view, deviceMode]);
+
   // Dynamic alerts list
   const [toasts, setToasts] = useState<Array<{
     id: string;
@@ -60,10 +133,6 @@ export default function App() {
     type: 'success' | 'info' | 'warning' | 'error';
     category: string;
   }>>([]);
-
-  // Search parameters
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchFocused, setSearchFocused] = useState(false);
 
   const addToast = (
     title: string, 
@@ -82,11 +151,10 @@ export default function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Simulated background push notifications for real system activity (Wiki, Docs, BPM flows)
+  // Simulated background push notifications for real system activity
   useEffect(() => {
     if (!user) return;
 
-    // Toast 1: Welcome tip after 3 seconds
     const t1 = setTimeout(() => {
       addToast(
         "Seja bem-vindo!", 
@@ -96,7 +164,6 @@ export default function App() {
       );
     }, 3500);
 
-    // Toast 2: Wiki update after 12 seconds
     const t2 = setTimeout(() => {
       addToast(
         "Wiki Corporativa Atualizada", 
@@ -106,7 +173,6 @@ export default function App() {
       );
     }, 12000);
 
-    // Toast 3: BPM Flow assigned after 25 seconds
     const t3 = setTimeout(() => {
       addToast(
         "Novo Fluxo BPM Atribuído", 
@@ -116,34 +182,10 @@ export default function App() {
       );
     }, 25000);
 
-    // Toast 4: Pending Document after 40 seconds
-    const t4 = setTimeout(() => {
-      addToast(
-        "Documento Indexado", 
-        "O arquivo PDF 'normativos_institucionais_firjan_2026.pdf' foi digitalizado e indexado com OCR para buscas cognitivas.", 
-        "info", 
-        "Documentos"
-      );
-    }, 40000);
-
-    // Toast 5: Warning if MFA is disabled
-    const t5 = setTimeout(() => {
-      if (!user.mfaEnabled) {
-        addToast(
-          "Medida de Segurança Recomendada", 
-          "Sua conta está sem autenticação de múltiplos fatores (MFA). Ative no perfil para obter seu selo de integridade e ganhar +100 XP adicionais!", 
-          "error", 
-          "Privacidade"
-        );
-      }
-    }, 18000);
-
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
-      clearTimeout(t4);
-      clearTimeout(t5);
     };
   }, [user]);
 
@@ -162,7 +204,6 @@ export default function App() {
       actionObj?: any;
     }> = [];
 
-    // Search articles
     articles.forEach((a) => {
       if (a.title.toLowerCase().includes(query) || (a.content || "").toLowerCase().includes(query)) {
         matches.push({
@@ -177,7 +218,6 @@ export default function App() {
       }
     });
 
-    // Search documents
     documents.forEach((d) => {
       if (d.filename.toLowerCase().includes(query) || d.category.toLowerCase().includes(query)) {
         matches.push({
@@ -192,7 +232,6 @@ export default function App() {
       }
     });
 
-    // Search sectors
     sectors.forEach((s) => {
       if (s.name.toLowerCase().includes(query) || s.description.toLowerCase().includes(query)) {
         matches.push({
@@ -207,29 +246,7 @@ export default function App() {
       }
     });
 
-    // Search custom tabs / views
-    const coreRoutes = [
-      { name: "Assistente IA & Chat", desc: "Pergunte à inteligência artificial", view: "chat", icon: Cpu, color: "bg-[#003BD1]" },
-      { name: "Trilha de Onboarding & XP", desc: "Atividades e metas lúdicas", view: "onboarding", icon: GraduationCap, color: "bg-[#003BD1]" },
-      { name: "Fluxos BPM e Suporte", desc: "Circuitos operacionais", view: "flows", icon: GitFork, color: "bg-[#003BD1]" },
-      { name: "Meu Perfil Corporativo", desc: "Certificado, PDF e MFA", view: "profile", icon: User, color: "bg-[#003BD1]" }
-    ];
-
-    coreRoutes.forEach((route) => {
-      if (route.name.toLowerCase().includes(query) || route.desc.toLowerCase().includes(query)) {
-        matches.push({
-          id: `route-${route.view}`,
-          name: route.name,
-          type: 'Funcionalidade',
-          icon: route.icon,
-          badgeColor: route.color,
-          extra: route.desc,
-          targetView: route.view
-        });
-      }
-    });
-
-    return matches.slice(0, 6);
+    return matches.slice(0, 5);
   };
 
   const handleSearchResultNavigation = (item: any) => {
@@ -237,7 +254,7 @@ export default function App() {
     setSearchQuery("");
     addToast(
       "Navegação Rápida",
-      `Direcionado com sucesso para "${item.name}" na aba correspondente.`,
+      `Direcionado para "${item.name}" na aba correspondente.`,
       "success",
       "Portal"
     );
@@ -301,13 +318,66 @@ export default function App() {
     }, 2500);
   };
 
+  // Tour controls
+  const handleTourNext = () => {
+    if (tourStep < 2) {
+      setTourStep(prev => prev + 1);
+    } else {
+      // Completed!
+      setTourActive(false);
+      localStorage.setItem("cio-tour-completed", "true");
+      addToast(
+        "Onboarding Concluído! 🏆",
+        "Você completou o tour oficial do C.I.O AI e ganhou +50 XP adicionais!",
+        "success",
+        "Integração"
+      );
+      if (user) {
+        setUser(prev => prev ? { ...prev, points: prev.points + 50 } : null);
+      }
+    }
+  };
+
+  const handleTourSkip = () => {
+    setTourActive(false);
+    localStorage.setItem("cio-tour-completed", "true");
+    addToast(
+      "Guia Minimizado",
+      "Você pode reiniciar o guia contextual a qualquer momento pelo menu de ajuda.",
+      "info",
+      "Portal"
+    );
+  };
+
+  const handleRestartTour = () => {
+    setView("dashboard");
+    setTourActive(true);
+    setTourStep(0);
+    setMobileMenuOpen(false);
+  };
+
+  // Toggle app vs web presentation mode
+  const toggleDeviceMode = () => {
+    setDeviceMode(prev => prev === "web" ? "app" : "web");
+    addToast(
+      "Apresentação Alternada",
+      `Exibindo projeto no formato ${deviceMode === "web" ? "Aplicativo Mobile PWA" : "Sistemas Web Adaptivo"}.`,
+      "info",
+      "Visualização"
+    );
+  };
+
+  // Search parameters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
+
   // Switch View renderers
   const renderActiveView = () => {
     if (!user) return null;
     
     switch (view) {
       case "dashboard":
-        return <DashboardView user={user} sectors={sectors} documents={documents} articles={articles} setView={setView} />;
+        return <DashboardView user={user} sectors={sectors} documents={documents} articles={articles} setView={setView} theme={theme} />;
       case "chat":
         return <ChatView user={user} />;
       case "wiki":
@@ -325,7 +395,7 @@ export default function App() {
       case "profile":
         return <ProfileView user={user} sectors={sectors} onUserUpdate={setUser} />;
       default:
-        return <DashboardView user={user} sectors={sectors} documents={documents} articles={articles} setView={setView} />;
+        return <DashboardView user={user} sectors={sectors} documents={documents} articles={articles} setView={setView} theme={theme} />;
     }
   };
 
@@ -349,73 +419,49 @@ export default function App() {
     { id: "profile", label: "Meu Perfil", icon: User }
   ];
 
-  // RBAC validation: allow Admin tools only for Gestores/Administradores
   if (user.role === 'Gestor' || user.role === 'Administrador' || user.role === 'Diretor') {
     navigationItems.push({ id: "admin", label: "Painel Sec & RBAC", icon: FileCheck });
   }
 
+  const isDark = theme === "dark";
+
+  // Render variables according to theme
+  const bodyBackground = isDark ? "bg-[#0b0f19] text-slate-100" : "bg-[#f8fafc] text-slate-800";
+  const headerClass = isDark ? "bg-[#111625]/95 border-[#1e293b]" : "bg-white/95 border-slate-200/80";
+  const sidebarClass = isDark ? "bg-[#111625] border-r border-[#1e293b]" : "bg-white border-r border-slate-200";
+  const searchInputClass = isDark ? "bg-[#161b2c] border-slate-700 text-white focus:border-[#003BD1]" : "bg-slate-50 border-slate-200 text-slate-800 focus:border-[#003BD1]";
+
+  // The comprehensive view wrapped inside smartphone or full-screen
+  const isAppModel = deviceMode === "app";
+
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans relative">
+    <div className={`min-h-screen flex flex-col font-sans relative transition-colors duration-200 ${bodyBackground}`} id="app-viewport-root">
       
       {/* Decorative ambient background lights */}
-      <div className="fixed top-0 left-0 w-full h-[400px] bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(0,59,209,0.03),transparent)] pointer-events-none z-0" />
+      <div className={`fixed top-0 left-0 w-full h-[400px] pointer-events-none z-0 transition-opacity duration-300 ${
+        isDark ? "bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(0,59,209,0.07),transparent)]" : "bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(0,59,209,0.03),transparent)]"
+      }`} />
       
-      {/* CORE WEB HEADER BAR (Light/Branded Theme) */}
-      <header className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-6 py-3.5 flex justify-between items-center z-40 shadow-xs">
+      {/* CORE WEB HEADER BAR */}
+      <header className={`sticky top-0 border-b px-6 py-3.5 flex justify-between items-center z-40 backdrop-blur-md shadow-2xs ${headerClass}`} id="app-core-header">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 md:hidden hover:bg-slate-50 rounded-lg border border-slate-200 transition-all text-slate-600 cursor-pointer"
+            className={`p-1.5 md:hidden rounded-lg border transition-all cursor-pointer ${
+              isDark ? "hover:bg-slate-800 border-slate-700 text-slate-300" : "hover:bg-slate-50 border-slate-200 text-slate-600"
+            }`}
           >
             {mobileMenuOpen ? <X className="w-5 h-5 text-[#003BD1]" /> : <Menu className="w-5 h-5" />}
           </button>
 
           <div className="flex items-center gap-2.5 cursor-pointer select-none" onClick={() => setView('dashboard')}>
-            {/* Custom vector stylized logo matching the requested attached logo mock */}
-            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-1 shadow-sm">
-              <svg width="26" height="26" viewBox="0 0 100 100" className="drop-shadow-sm select-none">
-                <defs>
-                  <linearGradient id="cyberDropletGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#7C3AED" />
-                    <stop offset="40%" stopColor="#003BD1" />
-                    <stop offset="75%" stopColor="#2563EB" />
-                    <stop offset="100%" stopColor="#00D2FF" />
-                  </linearGradient>
-                  <radialGradient id="nodeGlow" cx="35%" cy="35%" r="65%">
-                    <stop offset="0%" stopColor="#FFFFFF" />
-                    <stop offset="40%" stopColor="#67e8f9" />
-                    <stop offset="100%" stopColor="#0284c7" />
-                  </radialGradient>
-                </defs>
-                {/* Clockwise inward spiral starting from (76, 28) */}
-                <path 
-                  d="M 76 28 C 85 38, 85 58, 74 70 C 64 82, 40 82, 28 72 C 14 60, 14 38, 28 26 C 40 16, 64 16, 72 26 C 80 34, 80 54, 68 62 C 58 70, 44 70, 36 60 C 28 50, 30 36, 42 32 C 50 30, 58 36, 58 48 C 58 54, 52 58, 48 56" 
-                  fill="none" 
-                  stroke="url(#cyberDropletGrad)" 
-                  strokeWidth="11" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-                {/* Glowing cyan compass star centered at (78, 22) */}
-                <path 
-                  d="M 78 12 L 80.5 20.5 L 89 22 L 80.5 23.5 L 78 32 L 75.5 23.5 L 67 22 L 75.5 20.5 Z" 
-                  fill="#00FFFF" 
-                  opacity="0.95"
-                />
-                <circle cx="78" cy="22" r="2" fill="#FFFFFF" />
-                {/* 3D Glossy Light-Blue core sphere with highlight */}
-                <circle cx="48" cy="48" r="9" fill="url(#nodeGlow)" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-sm font-black tracking-widest text-[#003BD1] font-sans">C.I.O AI</h1>
-              <p className="text-[8px] tracking-[0.14em] font-mono text-slate-400 uppercase font-bold">Firjan Inteligência Corporativa</p>
-            </div>
+            {/* The beautiful responsive official logo component replacing previous orb */}
+            <AppLogo size="sm" theme={theme} />
           </div>
         </div>
 
         {/* Quick Search Bar (Central Position) with real-time navigation across Docs, Wiki, Setores */}
-        <div className="relative hidden md:block w-80">
+        <div className="relative hidden md:block w-80" id="tour-search">
           <div className="relative">
             <input 
               type="text" 
@@ -423,23 +469,25 @@ export default function App() {
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setTimeout(() => setSearchFocused(false), 250)}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 rounded-full py-1.5 pl-8.5 pr-8 text-xs focus:outline-none focus:border-[#003BD1] focus:ring-1 focus:ring-[#003BD1] transition-all font-sans text-slate-800"
+              className={`w-full rounded-full py-1.5 pl-8.5 pr-8 text-xs focus:outline-none focus:ring-1 focus:ring-[#003BD1] transition-all font-sans ${searchInputClass}`}
               placeholder="Busca rápida de Wiki, OCR Docs, Setor..."
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-slate-450 absolute left-3 top-2.5" />
             {searchQuery && (
               <button 
                 onMouseDown={(e) => { e.preventDefault(); setSearchQuery(""); }}
-                className="absolute right-3 top-2 hover:bg-slate-200 rounded-full p-0.5 cursor-pointer"
+                className="absolute right-3 top-2 hover:bg-slate-200/40 rounded-full p-0.5 cursor-pointer text-slate-400"
               >
-                <X className="w-3.5 h-3.5 text-slate-400" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
           {/* Quick search dropdown matches */}
           {searchFocused && searchQuery.length > 0 && (
-            <div className="absolute top-full right-0 mt-2 w-96 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 p-2 text-left animate-fade-in max-h-96 overflow-y-auto">
+            <div className={`absolute top-full right-0 mt-2 w-96 rounded-2xl shadow-xl z-50 p-2 text-left animate-fade-in max-h-96 overflow-y-auto border ${
+              isDark ? "bg-[#161b2b] border-slate-700" : "bg-white border-slate-200/90"
+            }`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-3 py-1 font-mono">Resultados da Pesquisa</p>
               
               {getFilteredItems().length > 0 ? (
@@ -450,13 +498,15 @@ export default function App() {
                       <button
                         key={item.id}
                         onMouseDown={() => handleSearchResultNavigation(item)}
-                        className="w-full text-left p-2 hover:bg-slate-50 rounded-xl flex items-start gap-2.5 cursor-pointer transition-all border border-transparent hover:border-slate-100/50"
+                        className={`w-full text-left p-2 rounded-xl flex items-start gap-2.5 cursor-pointer transition-all border border-transparent ${
+                          isDark ? "hover:bg-slate-800 hover:border-slate-700" : "hover:bg-slate-50 hover:border-slate-100"
+                        }`}
                       >
                         <div className={`w-7.5 h-7.5 rounded-lg flex items-center justify-center shrink-0 text-white ${item.badgeColor}`}>
                           <ItemIcon className="w-4 h-4" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-slate-850 truncate">{item.name}</p>
+                          <p className={`text-xs font-bold truncate ${isDark ? "text-slate-100" : "text-slate-800"}`}>{item.name}</p>
                           <div className="flex items-center gap-1.5 mt-0.5 text-[9px] text-[#003BD1] font-mono">
                             <span className="font-bold uppercase tracking-wider">{item.type}</span>
                             {item.extra && <span className="text-slate-400 truncate max-w-[200px]">({item.extra})</span>}
@@ -473,169 +523,303 @@ export default function App() {
           )}
         </div>
 
-        {/* Header Right profiles */}
-        <div className="flex items-center gap-4">
+        {/* Header Right controllers (Theme, Presentation state, Gamification) */}
+        <div className="flex items-center gap-2.5 sm:gap-4 md:pointer-events-auto">
+          
+          {/* Active presenter view toggle: Web systems and mobile app mock */}
+          <button 
+            onClick={toggleDeviceMode}
+            className={`p-1.5 sm:p-2 rounded-xl border flex items-center gap-1.5 text-xs font-mono font-bold uppercase transition-all cursor-pointer shadow-3xs ${
+              isDark 
+                ? "bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-700" 
+                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100/80"
+            }`}
+            title="Alternar entre visualização Web e Aplicativo Mobile"
+          >
+            {isAppModel ? <Monitor className="w-4 h-4 text-[#003BD1]" /> : <Smartphone className="w-4 h-4 text-[#003BD1]" />}
+            <span className="hidden lg:inline">{isAppModel ? "Modo Web" : "Modo App Container"}</span>
+          </button>
+
+          {/* Branded dual-theme toggler persisted globally with Firjan design systems */}
+          <button
+            id="theme-toggler"
+            onClick={() => setTheme(prev => prev === "light" ? "dark" : "light")}
+            className={`p-2 rounded-xl border transition-all cursor-pointer shadow-3xs ${
+              isDark 
+                ? "bg-slate-800/85 border-slate-700 text-amber-400 hover:bg-slate-700" 
+                : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/80"
+            }`}
+            title={`Ativar Modo ${isDark ? "Claro" : "Escuro (Estilo Firjan)"}`}
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
+          {/* Direct Guide manual trigger button */}
+          <button
+            onClick={handleRestartTour}
+            className={`p-2 rounded-xl border transition-all cursor-pointer hidden sm:block ${
+              isDark 
+                ? "bg-slate-800 border-slate-700 text-sky-400 hover:bg-slate-700" 
+                : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100"
+            }`}
+            title="Iniciar Tour Interativo"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
           
           {/* Gamification progress pill */}
           <div 
+            id="tour-gamification"
             onClick={() => setView('onboarding')}
-            className="hidden sm:flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 py-1.5 px-3 rounded-full cursor-pointer transition-all shadow-2xs"
+            className={`flex items-center gap-2 border py-1.5 px-3 rounded-full cursor-pointer transition-all shadow-2xs ${
+              isDark ? "bg-[#161b2c] border-slate-700 text-slate-100" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-600"
+            }`}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-slate-600">
+            <span className="text-[10px] font-mono font-bold tracking-wider uppercase">
               {user.points} XP
             </span>
           </div>
 
           <div 
             onClick={() => setView('profile')}
-            className="flex items-center gap-2.5 cursor-pointer p-0.5 pr-2.5 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-200"
+            className={`flex items-center gap-2.5 cursor-pointer p-0.5 pr-2 rounded-xl transition-all border ${
+              isDark ? "hover:bg-slate-800 border-transparent hover:border-slate-700" : "hover:bg-slate-50 border-transparent hover:border-slate-200"
+            }`}
           >
-            <div className="w-8.5 h-8.5 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center font-bold text-xs text-[#003BD1] uppercase font-mono overflow-hidden shrink-0 shadow-2xs">
+            <div className="w-8 h-8 rounded-lg bg-slate-150 border border-slate-200/80 flex items-center justify-center font-bold text-xs text-[#003BD1] uppercase font-mono overflow-hidden shrink-0 shadow-2xs">
               {user.avatar ? (
                 <img src={user.avatar} alt="Avatar" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
               ) : (
                 user.name.charAt(0)
               )}
             </div>
-            <div className="hidden md:block text-left">
-              <p className="text-xs font-bold text-slate-800 max-w-[124px] truncate flex items-center gap-1">
+            <div className="hidden lg:block text-left">
+              <p className="text-xs font-bold max-w-[100px] truncate flex items-center gap-1">
                 {user.name.split(" ")[0]}
                 {user.points >= 300 && <BadgeCheck className="w-4 h-4 text-[#003BD1] fill-[#003BD1]/10" />}
               </p>
-              <p className="text-[9px] text-[#003BD1] font-mono uppercase tracking-widest font-bold">{user.role}</p>
+              <p className="text-[8px] text-[#003BD1] font-mono uppercase tracking-widest font-bold">{user.role}</p>
             </div>
           </div>
         </div>
       </header>
 
-      {/* CORE FRAME LAYOUT */}
+      {/* CORE SPLIT PRESENTATION ARCHITECTURE OR NATIVE FRAME EMBED (Web/App toggle state fully responsive) */}
       <div className="flex-1 flex relative z-10">
         
-        {/* SIDEBAR: DESKTOP DRAWER */}
-        <nav className="hidden md:flex flex-col justify-between w-64 bg-white border-r border-slate-200 p-4 shrink-0 z-10 shadow-xs">
-          <div className="space-y-6">
-            <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block ml-3 font-semibold">Navegação Principal</span>
+        {/* DESKTOP DRAW SIDEBAR (Only visible in regular responsive web view) */}
+        {!isAppModel && (
+          <nav 
+            id="tour-navigation"
+            className={`hidden md:flex flex-col justify-between w-64 p-4 shrink-0 z-10 shadow-3xs ${sidebarClass}`}
+          >
+            <div className="space-y-6">
+              <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block ml-3 font-semibold">Navegação Principal</span>
 
-            <div className="space-y-1">
-              {navigationItems.map((item) => {
-                const IconComp = item.icon;
-                const isActive = view === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setView(item.id)}
-                    className={`w-full py-2.5 px-3.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                      isActive 
-                        ? "bg-slate-50 border border-slate-200 text-[#003BD1] shadow-2xs" 
-                        : "border border-transparent text-slate-600 hover:text-[#003BD1] hover:bg-slate-50"
-                    }`}
-                  >
-                    <span className="flex items-center gap-2.5">
-                      <IconComp className={`w-4 h-4 ${isActive ? 'text-[#003BD1]' : 'text-slate-400'}`} />
-                      {item.label}
-                    </span>
-                    {item.badge && (
-                      <span className="text-[8px] font-mono bg-blue-550/10 text-[#003BD1] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded border border-[#003BD1]/10">
-                        {item.badge}
+              <div className="space-y-1">
+                {navigationItems.map((item) => {
+                  const IconComp = item.icon;
+                  const isActive = view === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setView(item.id)}
+                      className={`w-full py-2.5 px-3.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                        isActive 
+                          ? isDark 
+                            ? "bg-slate-800 border border-slate-700 text-sky-400 shadow-2xs" 
+                            : "bg-slate-50 border border-slate-200 text-[#003BD1] shadow-2xs" 
+                          : isDark
+                            ? "border border-transparent text-slate-400 hover:text-white hover:bg-slate-800"
+                            : "border border-transparent text-slate-600 hover:text-[#003BD1] hover:bg-slate-50"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <IconComp className={`w-4 h-4 ${isActive ? 'text-[#003BD1]' : 'text-slate-405'}`} />
+                        {item.label}
                       </span>
-                    )}
+                      {item.badge && (
+                        <span className="text-[8px] font-mono bg-blue-550/10 text-[#003BD1] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded border border-[#003BD1]/10">
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className={`p-3 border rounded-xl space-y-1 font-mono text-[9px] ${
+                isDark ? "bg-[#161b2c] border-slate-800 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-500"
+              }`}>
+                <p className="font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  <Building className="w-3.5 h-3.5 text-[#003BD1]" /> Setor Ativo
+                </p>
+                <p className={`truncate font-semibold font-sans ${isDark ? "text-slate-350" : "text-slate-700"}`}>
+                  {sectors.find(s => s.id === user.sectorId)?.name || "Geral Firjan"}
+                </p>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="w-full py-2.5 px-3 rounded-xl text-xs font-mono text-slate-500 hover:text-red-600 hover:bg-red-50/20 flex items-center gap-3 transition-all cursor-pointer border border-transparent hover:border-red-200/50"
+              >
+                <LogOut className="w-4 h-4 text-red-500" />
+                Sair da Sessão
+              </button>
+            </div>
+          </nav>
+        )}
+
+        {/* SIDEBAR: MOBILE OVERLAY DRAWER (Web standard view) */}
+        {!isAppModel && (
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div 
+                initial={{ x: -280, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -280, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className={`fixed inset-y-0 left-0 w-64 p-5 pt-20 flex flex-col justify-between z-35 md:hidden shadow-2xl ${
+                  isDark ? "bg-[#111625] border-r border-slate-800" : "bg-white border-r border-slate-200"
+                }`}
+              >
+                <div className="space-y-6">
+                  <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block ml-3 font-semibold">Destaques</span>
+
+                  <div className="space-y-1">
+                    {navigationItems.map((item) => {
+                      const IconComp = item.icon;
+                      const isActive = view === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => { setView(item.id); setMobileMenuOpen(false); }}
+                          className={`w-full py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                            isActive 
+                              ? isDark ? "bg-slate-800 border border-slate-700 text-sky-450" : "bg-slate-50 border border-slate-200 text-[#003BD1]" 
+                              : isDark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-[#003BD1] hover:bg-slate-50"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <IconComp className={`w-4 h-4 ${isActive ? 'text-[#003BD1]' : 'text-slate-400'}`} />
+                            {item.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                    className="w-full py-2.5 px-3 rounded-xl text-xs font-mono text-slate-500 hover:text-red-650 hover:bg-red-50 flex items-center gap-3 transition-all cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4 text-red-500" />
+                    Sair
                   </button>
-                );
-              })}
-            </div>
-          </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
-          <div className="space-y-2">
-            {/* Direct sector label indicator */}
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 font-mono text-[9px] text-slate-500">
-              <p className="font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <Building className="w-3.5 h-3.5 text-[#003BD1]" /> Setor Ativo
-              </p>
-              <p className="truncate text-slate-700 font-semibold font-sans">
-                {sectors.find(s => s.id === user.sectorId)?.name || "Buscando..."}
-              </p>
-            </div>
+        {/* DYNAMIC VIEW CONTAINER: WEB vs APP BEZEL MOCKUP SIMULATOR (100% RESPONSIVE) */}
+        <div className="flex-1 flex justify-center items-stretch relative min-w-0" id="app-workspace-body">
+          {isAppModel ? (
+            /* PHONE MOCKUP SHELL CONTAINER (Fits viewport beautifully on desktop with sleek bezel) */
+            <div className="flex-1 overflow-y-auto w-full flex items-center justify-center p-3 sm:p-5 bg-gradient-to-tr from-slate-100 to-slate-250 dark:from-[#080b12] dark:to-[#111726]">
+              <div className={`shadow-2xl border-[10px] rounded-[42px] flex flex-col relative overflow-hidden transition-all duration-300 md:w-[380px] md:h-[760px] h-full w-full ${
+                isDark ? "border-[#1e293b] bg-[#0c0f17] text-white" : "border-slate-800 bg-[#f8fafc] text-slate-800"
+              }`}>
+                {/* Phone Top Notch Status bar */}
+                <div className="w-full h-8 px-5 shrink-0 flex justify-between items-center bg-black/4 text-slate-400 text-[10px] font-mono font-bold select-none leading-none z-10 relative">
+                  <span className="text-[9px]">{new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                  <div className="w-20 h-4 bg-slate-800 absolute left-1/2 -translate-x-1/2 rounded-b-xl flex items-center justify-center border-x border-b border-slate-700/50">
+                    <span className="w-3 h-3 rounded-full bg-slate-900 border border-slate-800/40" />
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[8.5px]">
+                    <span>5G LTE</span>
+                    <span>100% 🔋</span>
+                  </div>
+                </div>
 
-            <button
-              onClick={handleLogout}
-              className="w-full py-2.5 px-3 rounded-xl text-xs font-mono text-slate-500 hover:text-red-600 hover:bg-red-50 flex items-center gap-3 transition-all cursor-pointer border border-transparent hover:border-red-200/50"
-            >
-              <LogOut className="w-4 h-4 text-red-500" />
-              Sair da Sessão
-            </button>
-          </div>
-        </nav>
+                {/* Subview mobile scrolling content screen */}
+                <div className="flex-grow overflow-y-auto px-4 py-4.5 pb-24 relative" id="app-mobile-scrollscreen">
+                  <div className="space-y-4">
+                    {/* Small inner header */}
+                    <div className="flex items-center justify-between pb-3.5 border-b border-slate-200/40">
+                      <div className="flex items-center gap-1.5">
+                        <AppLogo iconOnly size="xs" />
+                        <span className="text-xs font-bold leading-none tracking-tight">C.I.O AI App</span>
+                      </div>
+                      <span className="text-[8px] font-mono bg-emerald-500/20 text-emerald-600 px-2 py-0.5 rounded-full font-bold uppercase">Conectado</span>
+                    </div>
 
-        {/* SIDEBAR: MOBILE OVERLAY DRAWER */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div 
-              initial={{ x: -280, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -280, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 p-5 pt-20 flex flex-col justify-between z-35 md:hidden shadow-2xl"
-            >
-              <div className="space-y-6">
-                <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block ml-3 font-semibold">Destaques</span>
+                    {renderActiveView()}
+                  </div>
+                </div>
 
-                <div className="space-y-1">
-                  {navigationItems.map((item) => {
-                    const IconComp = item.icon;
-                    const isActive = view === item.id;
+                {/* Mobile Bottom Native Navigation bar wrapper (Direct touch parameters) */}
+                <div 
+                  id="app-bottom-nav"
+                  className={`absolute bottom-0 inset-x-0 h-16 border-t flex items-center justify-between px-6 z-30 shadow-lg ${
+                    isDark ? "bg-[#121727] border-slate-800" : "bg-white border-slate-200"
+                  }`}
+                >
+                  {[
+                    { id: "dashboard", label: "Painel", icon: Activity },
+                    { id: "chat", label: "IA Chat", icon: Cpu },
+                    { id: "onboarding", label: "Trilha", icon: GraduationCap },
+                    { id: "profile", label: "Perfil", icon: User }
+                  ].map((btn) => {
+                    const BtnIcon = btn.icon;
+                    const isActive = view === btn.id;
                     return (
                       <button
-                        key={item.id}
-                        onClick={() => { setView(item.id); setMobileMenuOpen(false); }}
-                        className={`w-full py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                        key={btn.id}
+                        onClick={() => setView(btn.id)}
+                        className={`flex flex-col items-center justify-center cursor-pointer select-none transition-all ${
                           isActive 
-                            ? "bg-slate-50 border border-slate-200 text-[#003BD1]" 
-                            : "border border-transparent text-slate-600 hover:text-[#003BD1] hover:bg-slate-50"
+                            ? "text-[#003BD1] scale-105 font-bold" 
+                            : isDark ? "text-slate-450 hover:text-slate-200" : "text-slate-400 hover:text-slate-700"
                         }`}
                       >
-                        <span className="flex items-center gap-2.5">
-                          <IconComp className={`w-4 h-4 ${isActive ? 'text-[#003BD1]' : 'text-slate-400'}`} />
-                          {item.label}
-                        </span>
+                        <BtnIcon className="w-5 h-5 shrink-0" />
+                        <span className="text-[9px] font-medium tracking-tight mt-0.5">{btn.label}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                  className="w-full py-2.5 px-3 rounded-xl text-xs font-mono text-slate-500 hover:text-red-600 hover:bg-red-50 flex items-center gap-3 transition-all cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4 text-red-500" />
-                  Sair
-                </button>
+            </div>
+          ) : (
+            /* CONVENTIONAL RESPONSIVE FULL PAGE SCREEN CONTAINER */
+            <main className="flex-grow p-4 sm:p-6 overflow-y-auto relative z-10" id="app-web-viewpane">
+              <div className="max-w-6xl mx-auto space-y-6 pb-20">
+                {renderActiveView()}
               </div>
-            </motion.div>
+            </main>
           )}
-        </AnimatePresence>
-
-        {/* MAIN DYNAMIC VIEW PANE CONTAINER */}
-        <main className="flex-1 p-6 overflow-y-auto relative z-10">
-          <div className="max-w-6xl mx-auto space-y-6 pb-20">
-            {renderActiveView()}
-          </div>
-        </main>
+        </div>
 
       </div>
 
       {/* PWA FLOATING PROMPT PANEL */}
       {showPwaBanner && (
-        <div className="fixed bottom-4 right-4 z-50 p-4 rounded-2xl bg-white border border-slate-200 shadow-xl flex items-center justify-between gap-4 max-w-sm">
+        <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-2xl border shadow-xl flex items-center justify-between gap-4 max-w-sm ${
+          isDark ? "bg-[#111625] border-slate-800 text-white" : "bg-white border-slate-200 text-slate-800"
+        }`}>
           <div className="flex gap-3 items-center">
-            <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[#003BD1]/5 border border-[#003BD1]/10 flex items-center justify-center shrink-0">
               <Smartphone className="w-5 h-5 text-[#003BD1]" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-800 font-sans">C.I.O AI App</p>
-              <p className="text-[10px] text-slate-500 leading-tight">Instale como aplicativo nativo em seu desktop ou celular.</p>
+              <p className="text-xs font-bold font-sans">C.I.O AI App</p>
+              <p className="text-[10px] text-slate-400 leading-tight">Instale como aplicativo nativo em seu desktop ou celular.</p>
             </div>
           </div>
 
@@ -653,14 +837,98 @@ export default function App() {
               </button>
             )}
 
-            {/* User close option requested by the user */}
             <button 
               onClick={() => setShowPwaBanner(false)}
-              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-650 transition-all cursor-pointer"
+              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-450 hover:text-slate-650 transition-all cursor-pointer"
               title="Fechar Notificação"
             >
               <X className="w-3.5 h-3.5" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Contextual Onboarding Guided Tour Tooltip Panel */}
+      {tourActive && (
+        <div className="fixed inset-0 z-[9999] bg-black/65 backdrop-blur-3xs overflow-hidden flex items-center justify-center pointer-events-auto select-none transition-all duration-300">
+          {/* Spotlight Highlight Box pointing to targeted features */}
+          {targetRect && (
+            <div 
+              className="absolute border-4 border-dashed border-[#003BD1] rounded-2xl bg-transparent transition-all duration-300 pointer-events-none animate-pulse"
+              style={{
+                top: targetRect.top - 8,
+                left: targetRect.left - 8,
+                width: targetRect.width + 16,
+                height: targetRect.height + 16,
+                boxShadow: "0 0 0 999px rgba(0, 0, 0, 0.7)"
+              }}
+            />
+          )}
+
+          {/* Contextual Floating Tooltip Window */}
+          <div 
+            className={`absolute transition-all duration-300 p-5 rounded-2xl shadow-2xl border flex flex-col justify-between max-w-sm w-11/12 animate-fade-in ${
+              isDark ? "bg-[#161b2b] border-[#003BD1]/40 text-slate-100" : "bg-white border-slate-200 text-[#0f172a]"
+            }`}
+            style={targetRect ? {
+              top: targetRect.bottom + 18 + (targetRect.bottom + 250 > window.innerHeight ? -310 : 0),
+              left: Math.max(16, Math.min(window.innerWidth - 380, targetRect.left + (targetRect.width / 2) - 180))
+            } : {
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)"
+            }}
+          >
+            <div className="space-y-2 text-left select-text">
+              <div className="flex justify-between items-center text-[10px] uppercase font-mono font-black text-[#003BD1]">
+                <span>Guia de Visita ({tourStep + 1} de 3)</span>
+                <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-[8px] font-bold">Sincronizado</span>
+              </div>
+              
+              <h4 className="text-sm font-black tracking-tight flex items-center gap-2">
+                {tourStep === 0 && "🔍 Pesquisa Rápida Inteligente"}
+                {tourStep === 1 && "📋 Navegação por Abas"}
+                {tourStep === 2 && "🏆 Sistema de Gamificação (XP)"}
+              </h4>
+
+              <p className={`text-[11px] leading-relaxed ${isDark ? "text-slate-350" : "text-slate-600"}`}>
+                {tourStep === 0 && "Use esta barra para buscar de forma dinâmica em toda a plataforma. Ela retorna artigos chaves da Wiki, documentos indexados via OCR cognitivo e os setores institucionais."}
+                {tourStep === 1 && "Navegue de forma ágil pelas abas principais. Acesse o Painel de controle, resolva dúvidas em tempo real com o Chat IA (Gemini), cumpra atividades e organize fluxos BPM."}
+                {tourStep === 2 && "Sua jornada de integração recompensa você! Acompanhe seu progresso de XP em tempo real pelo novo gráfico interativo Recharts para alcançar metas institucionais."}
+              </p>
+            </div>
+
+            <div className={`flex items-center justify-between mt-5 pt-3 border-t ${
+              isDark ? "border-slate-800" : "border-slate-100"
+            }`}>
+              <button 
+                onClick={handleTourSkip}
+                className="text-[10px] font-mono font-bold uppercase hover:underline cursor-pointer opacity-70 hover:opacity-100"
+              >
+                Pular Tour
+              </button>
+
+              <div className="flex items-center gap-2">
+                {tourStep > 0 && (
+                  <button 
+                    onClick={() => setTourStep(prev => prev - 1)}
+                    className={`px-3 py-1.5 rounded-lg border text-[10px] font-mono font-bold uppercase transition-all ${
+                      isDark ? "hover:bg-slate-800 border-slate-700 text-slate-300" : "hover:bg-slate-50 border-slate-150 text-slate-600"
+                    } cursor-pointer`}
+                  >
+                    Voltar
+                  </button>
+                )}
+
+                <button 
+                  onClick={handleTourNext}
+                  className="px-4 py-1.5 rounded-lg bg-[#003BD1] hover:bg-[#002cb3] text-white text-[10px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+                >
+                  {tourStep === 2 ? "Concluir" : "Avançar"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -674,19 +942,19 @@ export default function App() {
             let IconToast = Bell;
 
             if (toast.type === "success") {
-              accentColor = "border-emerald-250 bg-white text-slate-800";
+              accentColor = isDark ? "border-emerald-900 bg-slate-900 text-slate-100 shadow-xl" : "border-emerald-250 bg-white text-slate-850 shadow-md";
               sideBanner = "bg-emerald-500";
               IconToast = ShieldCheck;
             } else if (toast.type === "warning") {
-              accentColor = "border-amber-200 bg-white text-slate-800";
+              accentColor = isDark ? "border-amber-900 bg-slate-900 text-slate-100 shadow-xl" : "border-amber-200 bg-white text-slate-850 shadow-md";
               sideBanner = "bg-amber-500";
               IconToast = AlertCircle;
             } else if (toast.type === "error") {
-              accentColor = "border-red-200 bg-white text-slate-800";
+              accentColor = isDark ? "border-red-900 bg-slate-900 text-slate-100 shadow-xl" : "border-red-200 bg-white text-slate-850 shadow-md";
               sideBanner = "bg-red-500";
               IconToast = AlertCircle;
             } else {
-              accentColor = "border-blue-200 bg-white text-slate-800";
+              accentColor = isDark ? "border-slate-800 bg-slate-900 text-slate-100 shadow-xl" : "border-blue-150 bg-white text-slate-850 shadow-md";
               sideBanner = "bg-blue-600";
               IconToast = Bell;
             }
@@ -697,26 +965,25 @@ export default function App() {
                 initial={{ opacity: 0, y: -20, x: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
-                className={`pointer-events-auto border p-4 rounded-2xl shadow-xl flex items-start gap-3.5 relative overflow-hidden ${accentColor}`}
+                className={`pointer-events-auto border p-4 rounded-2xl flex items-start gap-3.5 relative overflow-hidden ${accentColor}`}
               >
-                {/* Visual colored side stripes */}
                 <div className={`absolute top-0 bottom-0 left-0 w-1.5 ${sideBanner}`} />
 
                 <div className="shrink-0 mt-0.5">
-                  <IconToast className="w-5 h-5 text-slate-700" />
+                  <IconToast className="w-5 h-5 text-slate-400" />
                 </div>
                 <div className="flex-1 min-w-0 pr-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[9px] uppercase font-mono font-extrabold tracking-widest text-[#003BD1] bg-slate-50 px-1 py-0.5 rounded border border-slate-100">
+                    <span className="text-[9px] uppercase font-mono font-extrabold tracking-widest text-[#003BD1] bg-slate-50 dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-150 dark:border-slate-700">
                       {toast.category}
                     </span>
                   </div>
-                  <h5 className="text-xs font-bold text-slate-900 mt-1">{toast.title}</h5>
-                  <p className="text-[11px] text-slate-650 leading-snug mt-0.5">{toast.message}</p>
+                  <h5 className="text-xs font-bold mt-1">{toast.title}</h5>
+                  <p className="text-[11px] opacity-80 leading-snug mt-0.5">{toast.message}</p>
                 </div>
                 <button
                   onClick={() => removeToast(toast.id)}
-                  className="shrink-0 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
+                  className="shrink-0 p-1 hover:bg-slate-100/20 rounded-lg text-slate-400 hover:text-slate-350 transition-all cursor-pointer"
                   title="Fechar Alerta"
                 >
                   <X className="w-3.5 h-3.5" />

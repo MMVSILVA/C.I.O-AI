@@ -11,6 +11,7 @@ import {
   ShieldCheck 
 } from "lucide-react";
 import { UserProfile, UserRole } from "../types";
+import AppLogo from "./AppLogo";
 
 interface LoginScreenProps {
   onLoginSuccess: (user: UserProfile) => void;
@@ -163,49 +164,9 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
         {/* Head Branding Header */}
         <div className="text-center mb-8">
-          {/* Stylized Logo with Gradient and Sparkle, satisfying visual and logo requirements */}
-          <div className="mx-auto w-20 h-20 bg-white border border-slate-100 rounded-2xl flex items-center justify-center mb-4 shadow-md">
-            <svg width="60" height="60" viewBox="0 0 100 100" className="drop-shadow-sm select-none">
-              <defs>
-                <linearGradient id="cyberDropletGradLogin" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#7C3AED" />
-                  <stop offset="40%" stopColor="#003BD1" />
-                  <stop offset="75%" stopColor="#2563EB" />
-                  <stop offset="100%" stopColor="#00D2FF" />
-                </linearGradient>
-                <radialGradient id="nodeGlowLogin" cx="35%" cy="35%" r="65%">
-                  <stop offset="0%" stopColor="#FFFFFF" />
-                  <stop offset="40%" stopColor="#67e8f9" />
-                  <stop offset="100%" stopColor="#0284c7" />
-                </radialGradient>
-              </defs>
-              {/* Clockwise inward spiral starting from (76, 28) */}
-              <path 
-                d="M 76 28 C 85 38, 85 58, 74 70 C 64 82, 40 82, 28 72 C 14 60, 14 38, 28 26 C 40 16, 64 16, 72 26 C 80 34, 80 54, 68 62 C 58 70, 44 70, 36 60 C 28 50, 30 36, 42 32 C 50 30, 58 36, 58 48 C 58 54, 52 58, 48 56" 
-                fill="none" 
-                stroke="url(#cyberDropletGradLogin)" 
-                strokeWidth="11" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-              {/* Glowing cyan compass star centered at (78, 22) */}
-              <path 
-                d="M 78 12 L 80.5 20.5 L 89 22 L 80.5 23.5 L 78 32 L 75.5 23.5 L 67 22 L 75.5 20.5 Z" 
-                fill="#00FFFF" 
-                opacity="0.95"
-              />
-              <circle cx="78" cy="22" r="2" fill="#FFFFFF" />
-              {/* 3D Glossy Light-Blue core sphere with highlight */}
-              <circle cx="48" cy="48" r="9" fill="url(#nodeGlowLogin)" />
-            </svg>
+          <div className="flex justify-center mb-4">
+            <AppLogo size="xl" />
           </div>
-
-          <h2 className="text-3xl font-black tracking-tight text-[#003BD1] select-none">
-            C.I.O AI
-          </h2>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-1">
-            Corporate Intelligence & Onboarding AI
-          </p>
 
           {/* Call to action descriptive prompt requested */}
           <div className="mt-4 px-2 py-3 bg-slate-50 rounded-xl border border-slate-100">

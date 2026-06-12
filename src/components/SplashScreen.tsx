@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Cpu, ShieldCheck, Terminal } from "lucide-react";
+import { ShieldCheck, Terminal } from "lucide-react";
+import AppLogo from "./AppLogo";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -37,8 +38,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e1e24_1px,transparent_1px),linear-gradient(to_bottom,#1e1e24_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
       
       {/* Background neon ambient glows */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#004f9f]/10 rounded-full filter blur-[125px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#f29900]/5 rounded-full filter blur-[125px] pointer-events-none animate-pulse" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#003BD1]/10 rounded-full filter blur-[125px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#7C3AED]/5 rounded-full filter blur-[125px] pointer-events-none animate-pulse" />
  
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
@@ -48,32 +49,29 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       >
         <div className="relative mb-6">
           {/* Pulsing neon rings */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#004f9f] to-[#f29900] blur-xl opacity-35 animate-pulse" />
-          <div className="relative w-24 h-24 rounded-2xl bg-[#0b1329]/80 border border-[#1e1e24] flex items-center justify-center backdrop-blur-md">
-            <Cpu className="w-12 h-12 text-[#3b82f6] animate-pulse" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#003BD1] to-[#7C3AED] blur-2xl opacity-45 animate-pulse" />
+          <div className="relative p-6 rounded-2xl bg-[#0b1329]/90 border border-[#1e1e24] flex items-center justify-center backdrop-blur-md">
+            <AppLogo size="xl" iconOnly theme="dark" />
           </div>
         </div>
  
-        <h1 className="text-4xl md:text-5xl font-black tracking-widest bg-gradient-to-r from-white via-blue-200 to-[#004f9f] bg-clip-text text-transparent">
-          FIRJAN IA
-        </h1>
-        <p className="text-xs uppercase tracking-[0.35em] text-neutral-450 font-mono mt-2.5 select-none font-bold">
-          Sistema Firjan • Inteligência Artificial
-        </p>
+        <div className="mb-2">
+          <AppLogo size="lg" theme="dark" />
+        </div>
  
         {/* Loader panel */}
-        <div className="mt-12 w-80 md:w-96 p-4 rounded-xl bg-black/45 border border-[#1e1e24] backdrop-blur-md shadow-2xl">
+        <div className="mt-8 w-80 md:w-96 p-4 rounded-xl bg-black/45 border border-[#1e1e24] backdrop-blur-md shadow-2xl">
           <div className="flex justify-between items-center text-xs font-mono text-neutral-400 mb-2 font-bold">
-            <span className="flex items-center gap-1.5 text-sky-300">
+            <span className="flex items-center gap-1.5 text-sky-450">
               <Terminal className="w-3.5 h-3.5" />
               SYSTEM_BOOT
             </span>
-            <span className="text-[#3b82f6] animate-pulse">{progress}%</span>
+            <span className="text-[#003BD1] animate-pulse font-bold">{progress}%</span>
           </div>
  
           <div className="w-full h-2 bg-black rounded-full overflow-hidden p-0.5 border border-[#1e1e24]">
             <motion.div 
-              className="h-full rounded-full bg-gradient-to-r from-[#004f9f] to-[#f29900]"
+              className="h-full rounded-full bg-gradient-to-r from-[#003BD1] to-[#7C3AED]"
               style={{ width: `${progress}%` }}
               layoutId="bootProgressBar"
             />
