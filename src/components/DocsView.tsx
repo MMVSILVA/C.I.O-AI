@@ -108,24 +108,24 @@ export default function DocsView({ user }: DocsViewProps) {
   });
 
   return (
-    <div className="text-[#f4f4f5] font-sans grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)]">
+    <div className="text-slate-800 font-sans grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] animate-fade-in">
       
       {/* Left side: Upload Form + Document listing (span 5) */}
-      <div className="lg:col-span-5 bg-[#0a0f21]/90 border border-[#1e293b] p-4 rounded-2xl flex flex-col justify-between backdrop-blur-md h-full shadow-xl">
+      <div className="lg:col-span-5 bg-white border border-slate-200 p-4 rounded-2xl flex flex-col justify-between h-full shadow-xs">
         <div className="space-y-4">
           
           {/* Header */}
-          <div className="flex justify-between items-center pb-2 border-b border-[#1e293b]">
-            <h3 className="text-xs font-mono uppercase tracking-widest text-[#3b82f6] flex items-center gap-1.5 font-bold">
-              <Compass className="w-4 h-4 text-blue-400" />
+          <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+            <h3 className="text-xs font-mono uppercase tracking-widest text-blue-600 flex items-center gap-1.5 font-bold">
+              <Compass className="w-4 h-4 text-blue-600" />
               Repositório OCR Corporativo
             </h3>
-            <span className="text-[10px] text-neutral-500 font-mono font-bold">LGPD Sec</span>
+            <span className="text-[10px] text-slate-400 font-mono font-bold">LGPD Sec</span>
           </div>
 
           {/* Quick upload drop simulator */}
-          <form onSubmit={handleSimulatedUpload} className="p-3 bg-black border border-[#1e293b] rounded-xl space-y-2.5">
-            <span className="text-[10px] font-mono text-[#10b981] uppercase block tracking-wider font-extrabold">Submeter Novo PDF com OCR</span>
+          <form onSubmit={handleSimulatedUpload} className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+            <span className="text-[10px] font-mono text-emerald-800 uppercase block tracking-wider font-extrabold">Submeter Novo PDF com OCR</span>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <input 
@@ -133,13 +133,13 @@ export default function DocsView({ user }: DocsViewProps) {
                 value={uploadTitle}
                 onChange={(e) => setUploadTitle(e.target.value)}
                 placeholder="Título do Documento"
-                className="bg-[#050505] border border-[#1e293b] rounded-lg p-2 text-xs focus:ring-1 focus:ring-blue-500 text-white focus:outline-none"
+                className="bg-white border border-slate-200 rounded-lg p-2 text-xs focus:ring-1 focus:ring-blue-500 text-slate-800 focus:outline-none"
                 required
               />
               <select
                 value={uploadCategory}
                 onChange={(e) => setUploadCategory(e.target.value as any)}
-                className="bg-[#050505] border border-[#1e293b] rounded-lg p-2 text-xs text-white focus:ring-1 focus:ring-blue-500"
+                className="bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-750 focus:ring-1 focus:ring-blue-500"
               >
                 <option value="Manuais">Manuais</option>
                 <option value="Normativo">Normativos</option>
@@ -150,18 +150,18 @@ export default function DocsView({ user }: DocsViewProps) {
 
             {uploading ? (
               <div className="space-y-1 py-1">
-                <div className="flex justify-between text-[10px] font-mono text-blue-400">
+                <div className="flex justify-between text-[10px] font-mono text-blue-600">
                   <span className="animate-pulse">Extraindo Texto via OCR...</span>
                   <span>{uploadProgress}%</span>
                 </div>
-                <div className="w-full h-1 bg-[#050505] rounded-full overflow-hidden p-0.5 border border-[#1e293b]">
-                  <div className="h-full bg-gradient-to-r from-blue-600 to-[#10b981] rounded-full" style={{ width: `${uploadProgress}%` }} />
+                <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                  <div className="h-full bg-gradient-to-r from-blue-600 to-emerald-500 rounded-full" style={{ width: `${uploadProgress}%` }} />
                 </div>
               </div>
             ) : (
               <div className="flex gap-2">
-                <label className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 border border-dashed border-[#1e293b] hover:border-blue-500/20 rounded-lg text-xs bg-neutral-900/10 cursor-pointer text-neutral-400 hover:text-white transition-all">
-                  <Upload className="w-3.5 h-3.5 text-blue-400" />
+                <label className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 border border-dashed border-slate-250 hover:border-blue-500/30 rounded-lg text-xs bg-white cursor-pointer text-slate-500 hover:text-slate-850 transition-all shadow-2xs">
+                  <Upload className="w-3.5 h-3.5 text-blue-600" />
                   <span>{uploadFile ? uploadFile.name : "Selecionar PDF"}</span>
                   <input 
                     type="file" 
@@ -178,7 +178,7 @@ export default function DocsView({ user }: DocsViewProps) {
                 <button
                   type="submit"
                   disabled={!uploadTitle}
-                  className="py-2 px-4.5 bg-blue-600 hover:bg-blue-500 text-xs font-mono font-bold uppercase rounded-lg text-white transition-all cursor-pointer shadow disabled:opacity-30"
+                  className="py-2 px-4.5 bg-blue-600 hover:bg-blue-500 text-xs font-mono font-bold uppercase rounded-lg text-white transition-all cursor-pointer shadow-sm disabled:opacity-30"
                 >
                   Indexar
                 </button>
@@ -194,9 +194,9 @@ export default function DocsView({ user }: DocsViewProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Pesquisar em títulos, tags ou OCR..."
-                className="w-full bg-[#050505] border border-[#1e293b] rounded-xl py-2 pl-9 pr-4 text-xs focus:outline-none focus:border-blue-500 text-white"
+                className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-9 pr-4 text-xs focus:outline-none focus:border-blue-500 text-slate-800"
               />
-              <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             </div>
 
             {/* Category Filter Pills */}
@@ -207,8 +207,8 @@ export default function DocsView({ user }: DocsViewProps) {
                   onClick={() => setCategoryFilter(cat)}
                   className={`text-[9px] font-mono uppercase px-2 py-1 rounded-md border transition-all cursor-pointer ${
                     categoryFilter === cat
-                      ? "bg-blue-600 border-[#1e293b] text-white"
-                      : "bg-[#050505] border-[#1e293b] text-neutral-400 hover:text-white hover:bg-[#0d0d10]"
+                      ? "bg-blue-600 border-blue-600 text-white shadow-xs"
+                      : "bg-white border-slate-200 text-slate-500 hover:text-slate-850 hover:bg-slate-50"
                   }`}
                 >
                   {cat === "All" ? "Todos" : cat}
@@ -225,16 +225,16 @@ export default function DocsView({ user }: DocsViewProps) {
                 onClick={() => setSelectedDoc(doc)}
                 className={`w-full text-left p-3 rounded-xl border transition-all text-xs flex justify-between cursor-pointer ${
                   selectedDoc?.id === doc.id
-                    ? "bg-blue-950/15 border-blue-500/30"
-                    : "bg-black/30 border-[#1e293b] hover:border-blue-500/15"
+                    ? "bg-blue-50/60 border-blue-200 shadow-2xs"
+                    : "bg-slate-50/50 border-slate-200 hover:border-blue-150"
                 }`}
               >
                 <div className="min-w-0 pr-2 space-y-1">
-                  <p className="font-semibold text-neutral-200 truncate">{doc.title}</p>
-                  <p className="text-[10px] text-neutral-500 font-mono uppercase">{doc.filename} • {doc.fileSize}</p>
+                  <p className="font-semibold text-slate-700 truncate">{doc.title}</p>
+                  <p className="text-[10px] text-slate-400 font-mono uppercase">{doc.filename} • {doc.fileSize}</p>
                 </div>
                 <div className="flex flex-col items-end shrink-0 justify-center">
-                  <span className="text-[8px] uppercase tracking-wider font-mono font-bold bg-[#050505] border border-[#1e293b] text-neutral-400 px-1.5 py-0.5 rounded">
+                  <span className="text-[8px] uppercase tracking-wider font-mono font-bold bg-slate-100 border border-slate-200/60 text-slate-500 px-1.5 py-0.5 rounded">
                     {doc.category}
                   </span>
                 </div>
@@ -242,33 +242,33 @@ export default function DocsView({ user }: DocsViewProps) {
             ))}
 
             {filteredDocs.length === 0 && (
-              <p className="text-center text-xs text-neutral-550 font-mono py-6">Nenhum documento atende aos filtros.</p>
+              <p className="text-center text-xs text-slate-400 font-mono py-6">Nenhum documento atende aos filtros.</p>
             )}
           </div>
         </div>
 
-        <div className="text-[9px] font-mono text-neutral-500 leading-relaxed pt-2 border-t border-[#1e293b] select-none">
+        <div className="text-[9px] font-mono text-slate-400 leading-relaxed pt-2 border-t border-slate-150 select-none">
           <span>SECURE REPOSITORY • INTEGRADO COM RAG COGNITIVO</span>
         </div>
       </div>
 
       {/* Right side: Selected Document Metadata & OCR Preview Panel (span 7) */}
-      <div className="lg:col-span-7 bg-[#0a0f21]/90 border border-[#1e293b] rounded-2xl p-6 backdrop-blur-md flex flex-col overflow-y-auto h-full shadow-xl">
+      <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 flex flex-col overflow-y-auto h-full shadow-xs">
         {selectedDoc ? (
           <div className="space-y-5">
             
             {/* Header info */}
-            <div className="pb-4 border-b border-[#1e293b] space-y-1.5">
+            <div className="pb-4 border-b border-slate-200 space-y-1.5">
               <div className="flex justify-between items-center text-[10px] font-mono">
-                <span className="text-blue-300 bg-blue-950/20 border border-blue-500/15 px-2.5 py-0.5 rounded uppercase font-bold text-[9px]">
+                <span className="text-blue-600 bg-blue-50 border border-blue-105 px-2.5 py-0.5 rounded uppercase font-bold text-[9px] shadow-3xs">
                   {selectedDoc.category}
                 </span>
-                <span className="text-neutral-500 uppercase">Enviado em: {new Date(selectedDoc.uploadedAt).toLocaleDateString('pt-BR')}</span>
+                <span className="text-slate-400 uppercase">Enviado em: {new Date(selectedDoc.uploadedAt).toLocaleDateString('pt-BR')}</span>
               </div>
 
-              <h2 className="text-lg font-extrabold text-white">{selectedDoc.title}</h2>
+              <h2 className="text-lg font-extrabold text-slate-800">{selectedDoc.title}</h2>
               
-              <div className="flex items-center gap-3 text-xs text-neutral-400 pt-0.5">
+              <div className="flex items-center gap-3 text-xs text-slate-500 pt-0.5 animate-fade-in">
                 <span className="font-mono">Faturamento: {selectedDoc.uploadedBy}</span>
                 <span>•</span>
                 <span className="font-mono">Tamanho: {selectedDoc.fileSize}</span>
@@ -278,8 +278,8 @@ export default function DocsView({ user }: DocsViewProps) {
             {/* tags */}
             <div className="flex flex-wrap gap-1.5">
               {selectedDoc.tags.map((tag, idx) => (
-                <span key={idx} className="bg-black border border-[#10b981]/25 text-neutral-300 text-[10px] font-mono px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <Tag className="w-3 h-3 text-[#10b981]" />
+                <span key={idx} className="bg-emerald-50/50 border border-emerald-200/50 text-emerald-800 text-[10px] font-mono px-2.5 py-1 rounded-full flex items-center gap-1 shadow-3xs">
+                  <Tag className="w-3 h-3 text-emerald-600" />
                   {tag}
                 </span>
               ))}
@@ -287,29 +287,29 @@ export default function DocsView({ user }: DocsViewProps) {
 
             {/* OCR Extracted display block */}
             <div className="space-y-2">
-              <span className="text-xs font-mono text-[#10b981] uppercase tracking-widest flex items-center gap-1.5 font-bold">
-                <CloudLightning className="w-4 h-4 text-[#10b981]" />
+              <span className="text-xs font-mono text-emerald-700 uppercase tracking-widest flex items-center gap-1.5 font-bold">
+                <CloudLightning className="w-4 h-4 text-emerald-600" />
                 Texto Analítico do OCR Sincronizado
               </span>
 
-              <div className="bg-[#050505]/75 p-4 rounded-xl border border-[#1e293b] text-xs font-mono text-neutral-200 leading-relaxed text-justify relative min-h-36 select-text">
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs font-mono text-slate-650 leading-relaxed text-justify relative min-h-36 select-text shadow-2xs">
                 
                 {selectedDoc.ocrText ? (
                   <p>{selectedDoc.ocrText}</p>
                 ) : (
-                  <p className="text-neutral-500 italic">O texto correspondente está sendo minerado pela máquina de OCR.</p>
+                  <p className="text-slate-400 italic">O texto correspondente está sendo minerado pela máquina de OCR.</p>
                 )}
 
                 {/* Cyber style scanner accent overlay */}
-                <div className="absolute top-1 right-2 p-1 text-[8px] bg-blue-950/40 border border-blue-500/20 text-blue-400 font-bold uppercase rounded">
+                <div className="absolute top-2 right-2 p-1 text-[8px] bg-blue-50/80 border border-blue-200 text-blue-700 font-bold uppercase rounded">
                   Status: Processed_Secure
                 </div>
               </div>
             </div>
 
             {/* AI Action suggestion warning */}
-            <div className="p-3.5 bg-blue-950/10 border border-blue-500/10 rounded-xl text-xs text-blue-300 flex items-center gap-2">
-              <Cpu className="w-4.5 h-4.5 text-[#10b981]" />
+            <div className="p-3.5 bg-blue-50/50 border border-blue-100 rounded-xl text-xs text-blue-800 flex items-center gap-2">
+              <Cpu className="w-4.5 h-4.5 text-blue-600" />
               <p className="font-mono text-[11px] leading-normal">
                 Este arquivo já está integrado ao copiloto institucional! Vá ao menu do **Chat IA** e faça perguntas com o termo **"{selectedDoc.title.split(" ").slice(0, 2).join(" ")}"** para testar as conexões RAG em tempo real.
               </p>
@@ -317,8 +317,8 @@ export default function DocsView({ user }: DocsViewProps) {
 
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center text-neutral-500 py-12">
-            <FileSearch className="w-12 h-12 text-blue-400/20 mb-3 animate-pulse" />
+          <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 py-12">
+            <FileSearch className="w-12 h-12 text-blue-600/25 mb-3 animate-pulse" />
             <p className="text-xs font-mono">Nenhum espécime documental selecionado no repositório</p>
           </div>
         )}

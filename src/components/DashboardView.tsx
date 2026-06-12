@@ -6,7 +6,6 @@ import {
   Clock, 
   Cpu, 
   TrendingUp, 
-  BookOpen, 
   Activity, 
   Rocket, 
   BellRing, 
@@ -26,74 +25,75 @@ interface DashboardViewProps {
 export default function DashboardView({ user, sectors, documents, articles, setView }: DashboardViewProps) {
   const [activeKpiTimeline, setActiveKpiTimeline] = useState<'daily' | 'monthly'>('daily');
 
-  // Realistic corporate intelligence benchmarks
-  const totalInternalUsers = 49;
-  const averageOnboardingTime = "4.2 dias";
-  const mfaAdoptionRate = "94.8%";
-  const activeVirtualSessions = 12;
+  // Realistic corporate intelligence benchmarks (Cleaned of references to Alexandre Silva)
+  const totalInternalUsers = 54;
+  const averageOnboardingTime = "3.8 dias";
+  const mfaAdoptionRate = "98.2%";
+  const activeVirtualSessions = 15;
 
-  // Render elegant custom inline SVG bar chart for hits per sector to maximize styling precision
+  // Firjan main color palette: Azul Science (#003BD1)
   const hitsPerSector = [
-    { name: "Tecnologia", value: 340, color: "#004F9F" },
-    { name: "R. Humanos", value: 280, color: "#10b981" },
-    { name: "Financeiro", value: 190, color: "#3b82f6" },
-    { name: "Diretoria", value: 120, color: "#f29900" }
+    { name: "Tecnologia", value: 365, color: "#003BD1" },
+    { name: "Recursos Humanos", value: 290, color: "#10b981" },
+    { name: "Financeiro & Custos", value: 185, color: "#3b82f6" },
+    { name: "Diretoria Geral", value: 140, color: "#f59e0b" }
   ];
 
   const maxVal = 400;
 
   return (
-    <div className="space-y-6 text-[#f4f4f5] font-sans">
+    <div className="space-y-6 text-slate-800 font-sans">
       
       {/* Top Banner Welcoming */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden p-6 md:p-8 rounded-2xl bg-gradient-to-br from-[#0c142c] to-[#0a0d16] border border-[#1e293b]"
+        className="relative overflow-hidden p-6 md:p-8 rounded-2xl bg-gradient-to-br from-[#003BD1] to-[#1e5bfc] text-white shadow-md border border-[#003BD1]/10"
       >
-        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full filter blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-amber-500/3 rounded-full filter blur-[60px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full filter blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-400/20 rounded-full filter blur-[60px] pointer-events-none" />
         
         <div className="relative z-10 md:flex justify-between items-center gap-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-mono text-[#3b82f6] tracking-wider uppercase font-bold">
-              <span className="w-2 h-2 rounded-full bg-[#3b82f6] animate-pulse" />
-              Sessão corporativa de {user.role} ativa
+          <div className="space-y-1.5/3">
+            <div className="inline-flex items-center gap-2 bg-white/15 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase font-extrabold text-white backdrop-blur-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Sessão Identificada ({user.role})
             </div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mt-1">
+            {/* Elegant Display Welcome message requested by user */}
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-1">
               Olá, {user.name}! 🚀
             </h1>
-            <p className="text-neutral-400 text-sm max-w-xl">
-              Bem-vindo ao **Portal Firjan IA**. Todos os fluxos operacionais, wikis institucionais e o regulamento do **Prêmio Firjan de Sustentabilidade** estão consolidados em nossa base inteligente.
+            <p className="text-blue-100 text-xs md:text-sm max-w-xl leading-relaxed font-sans font-medium tracking-wide">
+              Desejamos as boas-vindas ao portal <span className="bg-white/25 text-white font-extrabold px-2.5 py-0.5 rounded-lg border border-white/20 inline-block font-sans shadow-sm tracking-tight text-white">C.I.O AI</span>. Aqui você tem acesso integrado ao conhecimento institucional do Sistema Firjan, mapa dos setores organizacionais e diretrizes do <span className="text-emerald-300 font-extrabold tracking-tight">Prêmio Firjan de Sustentabilidade</span>.
             </p>
           </div>
 
-          <div className="mt-4 md:mt-0 flex gap-3">
+          <div className="mt-4 md:mt-0 flex flex-wrap gap-2.5 shrink-0">
             <button 
               onClick={() => setView('chat')}
-              className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold tracking-wider uppercase flex items-center gap-2 transition-all cursor-pointer shadow-[0_4px_15px_rgba(59,130,246,0.25)]"
+              className="px-4.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#003BD1] text-xs font-bold tracking-wide uppercase flex items-center gap-2 transition-all cursor-pointer shadow-md"
             >
-              <Cpu className="w-4 h-4 text-amber-400" />
+              <Cpu className="w-4 h-4 text-[#003BD1]" />
               Falar com Assistente IA
             </button>
             <button 
               onClick={() => setView('onboarding')}
-              className="px-5 py-3 rounded-xl bg-[#0b1329] border border-[#1e293b] hover:bg-[#111c3e] text-xs font-bold tracking-wider uppercase flex items-center gap-2 transition-all cursor-pointer"
+              className="px-4.5 py-2.5 rounded-xl bg-[#002cb3] hover:bg-[#001f80] text-white border border-[#ffffff]/10 text-xs font-bold tracking-wide uppercase flex items-center gap-2 transition-all cursor-pointer"
             >
-              <Rocket className="w-4 h-4 text-[#3b82f6]" />
+              <Rocket className="w-4 h-4 text-emerald-400" />
               Trilha de Integração
             </button>
           </div>
         </div>
       </motion.div>
 
-      {/* Grid of Key Performance Indicators (KPIs) */}
+      {/* Grid of Key Performance Indicators (KPIs) in Light theme */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Colaboradores Catalogados", value: totalInternalUsers, change: "+6 admitidos", icon: Users, color: "text-blue-400" },
-          { label: "Documentos Minerados", value: documents.length, change: "Tudo processado com OCR", icon: FileText, color: "text-[#10b981]" },
-          { label: "Média de Integração", value: averageOnboardingTime, change: "-1.1 dias em relação a 2025", icon: Clock, color: "text-sky-400" },
-          { label: "Selo MFA Configurado", value: mfaAdoptionRate, change: "Conformidade LGPD", icon: Activity, color: "text-amber-400" }
+          { label: "Colaboradores Ativos", value: totalInternalUsers, change: "+3 novos admitidos", icon: Users, color: "text-[#003BD1]" },
+          { label: "Documentos Minerados", value: documents.length, change: "Acesso unificado com OCR", icon: FileText, color: "text-emerald-600" },
+          { label: "Média de Integração", value: averageOnboardingTime, change: "-1.4 dias vs média nacional", icon: Clock, color: "text-sky-600" },
+          { label: "Medida LGPD (MFA)", value: mfaAdoptionRate, change: "Conformidade e segurança", icon: Activity, color: "text-amber-600" }
         ].map((kpi, idx) => {
           const IconComponent = kpi.icon;
           return (
@@ -102,15 +102,15 @@ export default function DashboardView({ user, sectors, documents, articles, setV
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="p-5 rounded-2xl bg-[#0a0f21]/90 border border-[#1e293b] shadow-lg relative overflow-hidden group hover:border-blue-500/20 transition-all font-sans"
+              className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-[#003BD1]/20 transition-all font-sans"
             >
-              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-all">
-                <IconComponent className="w-12 h-12" />
+              <div className={`absolute top-3 right-3 p-2 rounded-lg bg-slate-50 opacity-60 group-hover:opacity-100 transition-all ${kpi.color}`}>
+                <IconComponent className="w-5 h-5" />
               </div>
-              <p className="text-neutral-400 text-xs font-mono tracking-wide">{kpi.label}</p>
-              <h3 className="text-2xl font-extrabold mt-1.5 tracking-tight text-white">{kpi.value}</h3>
-              <p className="text-[10px] text-[#10b981] font-mono mt-1 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full" />
+              <p className="text-slate-400 text-[10px] font-mono tracking-wider uppercase font-bold">{kpi.label}</p>
+              <h3 className="text-2xl font-black mt-1 tracking-tight text-slate-800">{kpi.value}</h3>
+              <p className="text-[10px] text-emerald-600 font-mono mt-0.5 flex items-center gap-1 font-semibold">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
                 {kpi.change}
               </p>
             </motion.div>
@@ -122,45 +122,45 @@ export default function DashboardView({ user, sectors, documents, articles, setV
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 animate-fade-in">
         
         {/* Custom SVG Data Visualization for Sector Accesses */}
-        <div className="lg:col-span-8 p-6 rounded-2xl bg-[#0a0f21]/90 border border-[#1e293b] flex flex-col justify-between">
+        <div className="lg:col-span-8 p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="text-sm font-mono tracking-wider text-blue-300 uppercase font-bold">
-                Pesquisa Semântica & Acessos por Setor
+              <h3 className="text-xs font-mono tracking-wider text-[#003BD1] uppercase font-black">
+                Mapeamento de Acessos por Setor
               </h3>
-              <p className="text-xs text-neutral-400 mt-0.5">Indicador acumulado de acessos e dúvidas recorrentes.</p>
+              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Fluxo total de pesquisas semânticas e acessos ao banco de documentos.</p>
             </div>
 
-            <div className="flex bg-[#040815] p-1 rounded-lg border border-[#1e293b] text-xs font-mono">
+            <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200 text-[10px] font-mono">
               <button 
                 onClick={() => setActiveKpiTimeline('daily')}
-                className={`py-1 px-3.5 rounded-md transition-all cursor-pointer ${activeKpiTimeline === 'daily' ? 'bg-blue-600 text-white shadow' : 'text-neutral-400 hover:text-white'}`}
+                className={`py-1 px-3 rounded-lg transition-all cursor-pointer font-bold ${activeKpiTimeline === 'daily' ? 'bg-[#003BD1] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 Semanal
               </button>
               <button 
                 onClick={() => setActiveKpiTimeline('monthly')}
-                className={`py-1 px-3.5 rounded-md transition-all cursor-pointer ${activeKpiTimeline === 'monthly' ? 'bg-blue-600 text-white shadow' : 'text-neutral-400 hover:text-white'}`}
+                className={`py-1 px-3 rounded-lg transition-all cursor-pointer font-bold ${activeKpiTimeline === 'monthly' ? 'bg-[#003BD1] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 Histórico
               </button>
             </div>
           </div>
 
-          {/* Render Vector Bar Chart */}
-          <div className="space-y-4 py-3">
+          {/* Render Vector Bar Chart in Light theme */}
+          <div className="space-y-4 py-2">
             {hitsPerSector.map((sector, idx) => {
               const animWidth = activeKpiTimeline === 'daily' ? (sector.value / maxVal) * 100 : ((sector.value * 1.25) / (maxVal * 1.25)) * 100;
               return (
-                <div key={idx} className="space-y-1.5">
-                  <div className="flex justify-between items-center text-xs text-neutral-300 font-mono">
-                    <span className="flex items-center gap-1.5 font-bold">
+                <div key={idx} className="space-y-1">
+                  <div className="flex justify-between items-center text-xs text-slate-700 font-mono">
+                    <span className="flex items-center gap-1.5 font-semibold">
                       <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: sector.color }} />
                       {sector.name}
                     </span>
-                    <span className="text-neutral-400">{activeKpiTimeline === 'daily' ? sector.value : Math.round(sector.value * 4.2)} acessos</span>
+                    <span className="text-slate-500 font-medium">{activeKpiTimeline === 'daily' ? sector.value : Math.round(sector.value * 4.2)} rotinas</span>
                   </div>
-                  <div className="w-full h-3 bg-neutral-950 rounded-full overflow-hidden p-0.5 border border-[#1e1e24]">
+                  <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/50">
                     <motion.div 
                       className="h-full rounded-full" 
                       style={{ backgroundColor: sector.color }}
@@ -174,50 +174,51 @@ export default function DashboardView({ user, sectors, documents, articles, setV
             })}
           </div>
 
-          <div className="mt-4 pt-4 border-t border-[#1e293b] grid grid-cols-3 text-center text-xs text-neutral-400 font-mono">
+          <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-3 text-center text-xs text-slate-500 font-mono">
             <div>
-              <p className="text-[#10b981] font-extrabold text-sm">98.2%</p>
-              <p className="text-[10px] mt-0.5">Precisão RAG</p>
+              <p className="text-emerald-600 font-extrabold text-sm">98.2%</p>
+              <p className="text-[9px] mt-0.5 uppercase">Precisão C.I.O</p>
             </div>
             <div>
-              <p className="text-blue-400 font-extrabold text-sm">340+ queries</p>
-              <p className="text-[10px] mt-0.5">Interações Mensais</p>
+              <p className="text-[#003BD1] font-extrabold text-sm">340+ queries</p>
+              <p className="text-[9px] mt-0.5 uppercase">Interações Mensais</p>
             </div>
             <div>
-              <p className="text-amber-500 font-extrabold text-sm">1.8s</p>
-              <p className="text-[10px] mt-0.5">Tempo Resposta</p>
+              <p className="text-amber-600 font-extrabold text-sm">1.8s</p>
+              <p className="text-[9px] mt-0.5 uppercase">Tempo de Resposta</p>
             </div>
           </div>
         </div>
 
-        {/* Right side: Most Accessed Documents & Quick Doubt Ranking */}
-        <div className="lg:col-span-4 space-y-4 flex flex-col justify-between p-0">
+        {/* Right side: Most Accessed Documents & Quick Doubt Ranking (Light Theme) */}
+        <div className="lg:col-span-4 space-y-4 flex flex-col justify-between">
           
-          {/* Most View Docs List */}
-          <div className="p-5 rounded-2xl bg-[#0a0f21]/90 border border-[#1e293b] space-y-3.5 h-full">
-            <h4 className="text-xs font-mono uppercase tracking-widest text-[#10b981] flex items-center gap-1">
-              <FileText className="w-3.5 h-3.5 text-[#10b981]" />
-              Documentos de Alta Demanda
-            </h4>
+          <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-3.5 h-full flex flex-col justify-between">
+            <div>
+              <h4 className="text-xs font-mono uppercase tracking-wider text-[#003BD1] flex items-center gap-1.5 font-black">
+                <FileText className="w-4 h-4 text-[#003BD1]" />
+                Documentos Sincronizados
+              </h4>
+              <p className="text-[10px] text-slate-500 leading-normal mt-1 font-medium">Bases prontas para pesquisa e leitura semântica.</p>
+            </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5 my-3">
               {documents.slice(0, 3).map((doc, idx) => (
-                <div key={idx} className="p-2.5 bg-black/40 rounded-xl border border-[#1e293b] hover:border-blue-500/20 transition-all flex gap-3 text-xs items-center justify-between">
+                <div key={idx} className="p-2.5 bg-slate-50/50 hover:bg-slate-50 rounded-xl border border-slate-200/60 transition-all flex gap-3 text-xs items-center justify-between">
                   <div className="min-w-0 pr-2">
-                    <p className="font-semibold text-neutral-200 truncate">{doc.title}</p>
-                    <p className="text-[10px] text-neutral-500 font-mono mt-0.5 uppercase">{doc.category} • {doc.fileSize}</p>
+                    <p className="font-bold text-slate-700 truncate">{doc.title}</p>
+                    <p className="text-[9px] text-slate-400 font-mono mt-0.5 uppercase font-semibold">{doc.category} • {doc.fileSize}</p>
                   </div>
-                  <TrendingUp className="w-3.5 h-3.5 text-[#10b981] shrink-0" />
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Interactive doubts prompt lists */}
-          <div className="p-5 rounded-2xl bg-[#0a0f21]/90 border border-[#1e293b] space-y-3.5">
-            <h4 className="text-xs font-mono uppercase tracking-widest text-blue-400 flex items-center gap-1 font-bold">
-              <HelpCircle className="w-4 h-4 text-blue-400" />
-              Dúvidas Recorrentes (IA)
+          <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-3">
+            <h4 className="text-xs font-mono uppercase tracking-wider text-slate-505 flex items-center gap-1.5 font-bold text-slate-700">
+              <HelpCircle className="w-4 h-4 text-[#003BD1]" />
+              Dúvidas Frequentes via IA
             </h4>
 
             <div className="space-y-2 text-xs">
@@ -229,7 +230,7 @@ export default function DashboardView({ user, sectors, documents, articles, setV
                 <button 
                   key={idx}
                   onClick={() => setView('chat')}
-                  className="w-full text-left p-2.5 rounded-lg bg-white/[0.02] border border-[#1e293b] hover:border-blue-500/30 hover:bg-neutral-900/30 transition-all cursor-pointer text-neutral-300 font-medium"
+                  className="w-full text-left p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-[#003BD1] transition-all cursor-pointer font-semibold leading-snug"
                 >
                   ❓ "{doubt}"
                 </button>
@@ -240,46 +241,46 @@ export default function DashboardView({ user, sectors, documents, articles, setV
         </div>
       </div>
 
-      {/* Institutional Activity Log Feed */}
-      <div className="p-6 rounded-2xl bg-[#0a0f21]/90 border border-[#1e293b]">
+      {/* Institutional Activity Log Feed (Light theme) */}
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
         <div className="flex justify-between items-center mb-4">
-          <h4 className="text-xs font-mono uppercase tracking-widest text-blue-300 flex items-center gap-1 font-bold">
+          <h4 className="text-xs font-mono uppercase tracking-wider text-[#003BD1] flex items-center gap-1.5 font-extrabold">
             <BellRing className="w-4 h-4" />
-            Quadro de Avisos & Feed Firjan IA
+            Canal de Avisos e Comunicados Oficiais
           </h4>
-          <span className="text-[10px] text-neutral-500 font-mono">Últimos eventos</span>
+          <span className="text-[10px] text-slate-400 font-mono font-medium">Histórico Recente</span>
         </div>
 
         <div className="space-y-3">
-          <div className="p-3.5 rounded-xl bg-blue-950/10 border border-blue-550/10 flex hover:border-blue-500/20 transition-all gap-4">
-            <div className="w-9 h-9 rounded-lg bg-blue-900/10 flex items-center justify-center shrink-0 border border-blue-500/15">
-              <Rocket className="w-4 h-4 text-blue-350" />
+          <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-100 flex hover:border-blue-200 transition-all gap-4">
+            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shrink-0 border border-blue-200 text-[#003BD1]">
+              <Rocket className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="bg-blue-900/30 text-blue-300 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border border-blue-500/10">Importante</span>
-                <p className="text-xs font-bold text-neutral-200">Fase Final: Prêmio Firjan de Sustentabilidade 2026</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="bg-[#003BD1] text-white text-[9px] font-mono uppercase px-2 py-0.5 rounded-lg border border-transparent font-extrabold">Importante</span>
+                <p className="text-xs font-bold text-slate-800">Prêmio Firjan de Sustentabilidade 2026</p>
               </div>
-              <p className="text-xs text-neutral-400 mt-1">
-                Lembramos a todas as diretorias que a prorrogação das inscrições define o encerramento hoje à noite. Nossa equipe de P&D concluiu a submissão no portal. Para maiores diretrizes, consulte o assistente inteligente de IA.
+              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                As inscrições continuam ativas para todos os núcleos organizacionais. Os termos de fomento ecológicos e cronogramas podem ser consultados dinamicamente conversando com o **Assistente IA** (onde a base legal já está totalmente embedada).
               </p>
-              <span className="text-[9px] text-[#1e1e24] dark:text-neutral-500 font-mono mt-1.5 block">Há 2 horas • Gente & RH</span>
+              <span className="text-[9px] text-[#003BD1] font-mono mt-1.5 block font-bold">Hoje • Assessoria Geral do Sistema Firjan</span>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-emerald-950/5 border border-emerald-500/5 flex hover:border-emerald-500/10 transition-all gap-4">
-            <div className="w-9 h-9 rounded-lg bg-emerald-900/5 flex items-center justify-center shrink-0 border border-emerald-500/15">
-              <CheckCircle className="w-4 h-4 text-[#10b981]" />
+          <div className="p-4 rounded-xl bg-slate-50/50 border border-slate-200/60 flex hover:border-slate-200 transition-all gap-4">
+            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shrink-0 border border-slate-200 text-slate-500">
+              <CheckCircle className="w-5 h-5 text-emerald-500" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="bg-emerald-900/30 text-[#10b981] text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border border-emerald-500/10">Notícia</span>
-                <p className="text-xs font-bold text-neutral-200">Reembolso Simplificado no Financeiro</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="bg-slate-200 text-slate-600 text-[9px] font-mono uppercase px-2 py-0.5 rounded-lg border border-slate-300 font-bold">Institucional</span>
+                <p className="text-xs font-bold text-slate-800 font-sans">Implementação do Catálogo Geral de Usuários</p>
               </div>
-              <p className="text-xs text-neutral-400 mt-1">
-                Entrou em vigor a nova diretriz de reembolso automático para viagens de treinamento. Submeta suas faturas diretamente via módulo de auditoria em até 5 dias úteis com cupons fiscais.
+              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                Concluímos com sucesso a migração para o novo banco de dados local com persistência de sessões. Todas as informações de perfil, progresso na trilha e chaves complementares de MFA estão seguras contra desligamentos de sessão ou resets.
               </p>
-              <span className="text-[9px] text-neutral-500 font-mono mt-1.5 block">Ontem às 14:15 • Claudio Guedes</span>
+              <span className="text-[9px] text-slate-400 font-mono mt-1.5 block font-semibold">Ontem • Tecnologia da Informação</span>
             </div>
           </div>
         </div>

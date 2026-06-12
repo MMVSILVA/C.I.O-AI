@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
+import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
 import { 
@@ -21,33 +22,57 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// --- IN-MEMORY DATABASE STORES ---
-// We initialize this with high-quality default data for immediate, delightful platform feedback.
+// --- LOCAL DATABASE SYSTEM PERSISTENCE ---
+const USERS_DB_PATH = path.join(process.cwd(), "users-db.json");
 
-let users: UserProfile[] = [
-  {
-    id: "user-1",
-    name: "Alexandre Silva",
-    email: "vinidoctor@gmail.com",
-    role: "Gestor",
-    sectorId: "sec-ti",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
-    points: 450,
-    mfaEnabled: true,
-    onboardingProgress: 85
-  },
-  {
-    id: "user-2",
-    name: "Juliana Mendes",
-    email: "juliana@corporativo.com",
-    role: "Colaborador",
-    sectorId: "sec-rh",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
-    points: 200,
-    mfaEnabled: false,
-    onboardingProgress: 30
+function loadUsers(): UserProfile[] {
+  try {
+    if (fs.existsSync(USERS_DB_PATH)) {
+      const data = fs.readFileSync(USERS_DB_PATH, "utf8");
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error("Erro ao carregar banco de dados local de usuários:", error);
   }
-];
+
+  // Lista padrão estrita com e-mails corporativos @firjan.com.br, sem o Alexandre Silva
+  const defaultUsers: UserProfile[] = [
+    {
+      id: "user-juliana",
+      name: "Juliana Mendes",
+      email: "juliana@firjan.com.br",
+      role: "Colaborador",
+      sectorId: "sec-rh",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
+      points: 320,
+      mfaEnabled: true,
+      onboardingProgress: 100
+    },
+    {
+      id: "user-renato",
+      name: "Renato Albuquerque",
+      email: "renato@firjan.com.br",
+      role: "Diretor",
+      sectorId: "sec-dir",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
+      points: 500,
+      mfaEnabled: true,
+      onboardingProgress: 100
+    }
+  ];
+  saveUsers(defaultUsers);
+  return defaultUsers;
+}
+
+function saveUsers(usersList: UserProfile[]) {
+  try {
+    fs.writeFileSync(USERS_DB_PATH, JSON.stringify(usersList, null, 2), "utf8");
+  } catch (error) {
+    console.error("Erro ao atualizar banco de dados local de usuários:", error);
+  }
+}
+
+let users: UserProfile[] = loadUsers();
 
 let sectors: Sector[] = [
   {
@@ -62,7 +87,7 @@ let sectors: Sector[] = [
   {
     id: "sec-ti",
     name: "Tecnologia da Informação",
-    responsible: "Alexandre Silva",
+    responsible: "Carlos Henrique",
     roleDescription: "Infraestrutura de nuvem, segurança corporativa, desenvolvimento e suporte.",
     parentId: "sec-dir",
     connections: ["sec-rh", "sec-fin"],
@@ -105,7 +130,7 @@ Todos os colaboradores são guardiões das informações e dos dados pessoais tr
 
 ### 3. Em Caso de Incidentes:
 Qualquer suspeita de vazamento, perda de equipamento corporativo ou acesso não autorizado deve ser reportado de imediato à equipe de TI e ao DPO através do e-mail oficial: **dpo@firjan.com.br**.`,
-    author: "Alexandre Silva",
+    author: "Carlos Henrique",
     sectorId: "sec-ti",
     createdAt: "2026-05-10T14:30:00Z",
     updatedAt: "2026-06-01T10:00:00Z",
@@ -172,7 +197,7 @@ g) Governança Corporativa.
     status: "Approved",
     tags: ["Firjan", "Sustentabilidade", "ESG", "Incentivos"],
     comments: [
-      { id: "c2", authorName: "Alexandre Silva", text: "Excelente! Esta informação é extremamente útil para orientar nossa submissão conjunta dos setores de TI e Operações.", createdAt: "2026-05-18T10:45:00Z" }
+      { id: "c2", authorName: "Carlos Henrique", text: "Excelente! Esta informação é extremamente útil para orientar nossa submissão conjunta dos setores de TI e Operações.", createdAt: "2026-05-18T10:45:00Z" }
     ]
   }
 ];
@@ -184,7 +209,7 @@ let documents: DocumentMeta[] = [
     title: "Regulamento Oficial Prêmio Firjan de Sustentabilidade 2026",
     fileSize: "14.2 MB",
     uploadedAt: "2026-06-02T22:15:00Z",
-    uploadedBy: "Alexandre Silva",
+    uploadedBy: "Renato Albuquerque",
     sectorId: "sec-dir",
     tags: ["Firjan", "Sustentabilidade", "ESG", "Regulamento"],
     status: "Processed",
@@ -212,7 +237,7 @@ let documents: DocumentMeta[] = [
     title: "Normativa Interna de Segurança: Autenticação MFA e Contas",
     fileSize: "2.1 MB",
     uploadedAt: "2026-05-20T10:00:00Z",
-    uploadedBy: "Alexandre Silva",
+    uploadedBy: "Carlos Henrique",
     sectorId: "sec-ti",
     tags: ["Segurança", "MFA", "TI", "Normativa"],
     status: "Processed",
@@ -313,7 +338,7 @@ let auditLogs: AuditLog[] = [
   { id: "log-3", timestamp: "2026-06-02T19:12:00Z", userEmail: "juliana@corporativo.com", action: "Acessou Módulo Onboarding Digital", sector: "Recursos Humanos", ip: "189.12.87.1" }
 ];
 
-let selectedUser = users[0]; // Logged in profile mock session
+let selectedUser: UserProfile | null = null; // Always initialize with the login screen (null session)
 
 // --- API ENDPOINTS ---
 
@@ -323,56 +348,106 @@ app.get("/api/auth/me", (req, res) => {
 });
 
 app.post("/api/auth/login", (req, res) => {
-  const { email, password, sectorId } = req.body;
+  const { email } = req.body;
   
-  // High fidelity login simulation
-  const foundUser = users.find(u => u.email.toLowerCase() === (email || "").toLowerCase());
+  if (!email || !email.toLowerCase().endsWith("@firjan.com.br")) {
+    return res.status(400).json({ 
+      success: false, 
+      error: "E-mail institucional inválido. Use um endereço terminado em @firjan.com.br" 
+    });
+  }
+  
+  const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
   if (foundUser) {
     selectedUser = foundUser;
     res.json({ success: true, user: foundUser });
   } else {
-    // Dynamically create the user context for instant platform use
-    const nameStr = (email || "").split("@")[0] || "Colaborador Novo";
-    const captName = nameStr.charAt(0).toUpperCase() + nameStr.slice(1);
-    const newUser: UserProfile = {
-      id: `user-${Date.now()}`,
-      name: captName,
-      email: email || "usuario@cioai.com.br",
-      role: "Colaborador",
-      sectorId: sectorId || "sec-rh",
-      points: 50,
-      mfaEnabled: false,
-      onboardingProgress: 5
-    };
-    users.push(newUser);
-    selectedUser = newUser;
-    res.json({ success: true, user: newUser, comment: "Novo usuário simulado cadastrado e logado." });
+    res.status(404).json({ 
+      success: false, 
+      error: "Este e-mail @firjan.com.br não está cadastrado. Por favor, vá em 'Cadastre-se' para criar seu perfil corporativo." 
+    });
   }
 });
 
 app.post("/api/auth/register", (req, res) => {
   const { name, email, role, sectorId } = req.body;
+  
+  if (!email || !email.toLowerCase().endsWith("@firjan.com.br")) {
+    return res.status(400).json({ 
+      success: false, 
+      error: "O e-mail deve obrigatoriamente terminar com @firjan.com.br" 
+    });
+  }
+
+  const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (existing) {
+    return res.status(400).json({ 
+      success: false, 
+      error: "Este e-mail já está cadastrado no banco de dados local." 
+    });
+  }
+
   const newUser: UserProfile = {
     id: `user-${Date.now()}`,
     name: name || "Novo Colaborador",
-    email: email || "usuario@cioai.com.br",
+    email: email.toLowerCase(),
     role: role || "Colaborador",
     sectorId: sectorId || "sec-rh",
     points: 100,
     mfaEnabled: false,
     onboardingProgress: 10
   };
+
   users.push(newUser);
+  saveUsers(users); // PERSIST IN BANCO DE DADOS LOCAL
   selectedUser = newUser;
   res.json({ success: true, user: newUser });
 });
 
+app.post("/api/auth/logout", (req, res) => {
+  selectedUser = null;
+  res.json({ success: true });
+});
+
+app.post("/api/auth/profile/update", (req, res) => {
+  if (!selectedUser) {
+    return res.status(401).json({ success: false, error: "Usuário não autenticado." });
+  }
+
+  const { name, email, role, sectorId, avatar } = req.body;
+
+  if (email && !email.toLowerCase().endsWith("@firjan.com.br")) {
+    return res.status(400).json({ 
+      success: false, 
+      error: "O e-mail deve obrigatoriamente terminar com @firjan.com.br" 
+    });
+  }
+
+  const idx = users.findIndex(u => u.id === selectedUser!.id);
+  if (idx !== -1) {
+    if (name) users[idx].name = name;
+    if (email) users[idx].email = email.toLowerCase();
+    if (role) users[idx].role = role;
+    if (sectorId) users[idx].sectorId = sectorId;
+    if (avatar !== undefined) users[idx].avatar = avatar;
+
+    selectedUser = users[idx];
+    saveUsers(users); // PERSIST IN BANCO DE DADOS LOCAL
+    res.json({ success: true, user: selectedUser });
+  } else {
+    res.status(404).json({ success: false, error: "Usuário não encontrado." });
+  }
+});
+
 app.post("/api/auth/mfa-toggle", (req, res) => {
+  if (!selectedUser) {
+    return res.status(401).json({ success: false, error: "Não autenticado." });
+  }
   selectedUser.mfaEnabled = !selectedUser.mfaEnabled;
-  // Update in array
   const idx = users.findIndex(u => u.id === selectedUser.id);
   if (idx !== -1) {
     users[idx].mfaEnabled = selectedUser.mfaEnabled;
+    saveUsers(users); // PERSIST IN BANCO DE DADOS LOCAL
   }
   res.json({ success: true, mfaEnabled: selectedUser.mfaEnabled });
 });

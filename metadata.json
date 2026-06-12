@@ -1,6 +1,6 @@
 {
-  "name": "Firjan IA",
-  "description": "Plataforma de Inteligência Artificial do Sistema Firjan - Centralização corporativa de conhecimento, cooperação de setores e assistente inteligente.",
+  "name": "C.I.O AI",
+  "description": "Corporate Intelligence & Onboarding AI - Uma plataforma inteligente de centralização, organização e disseminação corporativa do conhecimento para o Sistema Firjan.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

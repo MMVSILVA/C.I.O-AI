@@ -97,33 +97,33 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
   ];
 
   return (
-    <div className="text-[#f4f4f5] font-sans space-y-6 animate-fade-in">
+    <div className="text-slate-800 font-sans space-y-6 animate-fade-in">
       
       {/* Upper stats grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
         
         {/* Onboarding Welcome progress status (span 8) */}
-        <div className="md:col-span-8 p-6 rounded-2xl bg-gradient-to-br from-[#0c142c]/95 to-[#0a0d16]/70 border border-[#1e293b] flex flex-col justify-between shadow-xl">
+        <div className="md:col-span-8 p-6 rounded-2xl bg-white border border-slate-200/80 flex flex-col justify-between shadow-xs">
           <div className="space-y-1">
-            <span className="text-[10px] text-[#10b981] font-mono tracking-widest uppercase flex items-center gap-1 font-bold">
+            <span className="text-[10px] text-[#003BD1] font-mono tracking-widest uppercase flex items-center gap-1 font-bold">
               <GraduationCap className="w-4 h-4" /> Trilha de Qualificação Continuada
             </span>
-            <h2 className="text-2xl font-black text-white mt-1">Evolução do Colaborador</h2>
-            <p className="text-xs text-neutral-400">Complete as tarefas lúdicas e trilhas interativas de treinamento técnico para liberar seu certificado.</p>
+            <h2 className="text-2xl font-black text-slate-800 mt-1">Evolução do Colaborador</h2>
+            <p className="text-xs text-slate-500">Complete as tarefas lúdicas e trilhas interativas de treinamento técnico para liberar seu certificado.</p>
           </div>
 
           <div className="mt-6 space-y-3">
             <div className="flex justify-between items-center text-xs font-mono">
-              <span className="text-neutral-400 flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-[#10b981] animate-bounce" />
-                Pontos Ganhos: <strong className="text-white font-bold">{user.points} XP</strong>
+              <span className="text-slate-500 flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-emerald-600 animate-bounce" />
+                Pontos Ganhos: <strong className="text-slate-850 font-bold">{user.points} XP</strong>
               </span>
-              <span className="text-[#10b981] font-bold">{user.onboardingProgress}% Concluído</span>
+              <span className="text-emerald-600 font-bold">{user.onboardingProgress}% Concluído</span>
             </div>
 
-            <div className="w-full h-3 bg-black rounded-full p-0.5 border border-[#1e293b] overflow-hidden">
+            <div className="w-full h-3 bg-slate-100 rounded-full p-0.5 border border-slate-200 overflow-hidden">
               <motion.div 
-                className="h-full rounded-full bg-gradient-to-r from-blue-600 to-[#10b981]"
+                className="h-full rounded-full bg-gradient-to-r from-blue-600 to-emerald-500"
                 initial={{ width: 0 }}
                 animate={{ width: `${user.onboardingProgress}%` }}
                 transition={{ duration: 0.8 }}
@@ -133,29 +133,29 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
         </div>
 
         {/* Dynamic certificate card (span 4) */}
-        <div className="md:col-span-4 p-5 rounded-2xl bg-[#0a0f21]/90 border border-[#1e293b] flex flex-col justify-between backdrop-blur-md relative overflow-hidden shadow-xl">
+        <div className="md:col-span-4 p-5 rounded-2xl bg-white border border-slate-200/80 flex flex-col justify-between relative overflow-hidden shadow-xs">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#10b981]/5 rounded-full filter blur-xl pointer-events-none" />
           
           <div className="space-y-1.5">
-            <span className="text-[9px] font-mono text-neutral-500 uppercase">Selo de Qualificação</span>
-            <h4 className="text-xs font-extrabold text-neutral-200 font-sans">Certificado Digital Firjan IA</h4>
+            <span className="text-[9px] font-mono text-slate-400 uppercase">Selo de Qualificação</span>
+            <h4 className="text-xs font-extrabold text-slate-700 font-sans">Certificado Digital Firjan IA</h4>
           </div>
 
           {user.points >= 300 ? (
-            <div className="my-3 text-center p-3 rounded-xl bg-blue-950/15 border border-blue-500/15 space-y-2">
-              <Award className="w-10 h-10 text-[#10b981] mx-auto animate-pulse" />
-              <p className="text-[10px] text-blue-200 font-mono uppercase tracking-widest font-bold">✓ CERTIFICADO GERADO</p>
-              <p className="text-[9px] text-neutral-400 leading-normal">Parabéns! {user.name} está verificado em conformidade de processos e segurança corporativa.</p>
+            <div className="my-3 text-center p-3 rounded-xl bg-blue-50/50 border border-blue-100 space-y-2">
+              <Award className="w-10 h-10 text-emerald-600 mx-auto animate-pulse" />
+              <p className="text-[10px] text-blue-800 font-mono uppercase tracking-widest font-bold">✓ CERTIFICADO GERADO</p>
+              <p className="text-[9px] text-slate-500 leading-normal">Parabéns! {user.name} está verificado em conformidade de processos e segurança corporativa.</p>
             </div>
           ) : (
-            <div className="my-3 text-center p-4 rounded-xl bg-black/40 border border-[#1e293b] space-y-1.5 font-mono">
-              <GraduationCap className="w-8 h-8 text-neutral-600 mx-auto" />
-              <p className="text-[10px] text-neutral-500 font-mono uppercase font-bold">Bloqueado • 300 XP Necessários</p>
-              <p className="text-[9px] text-neutral-600 leading-normal">Faltam {Math.max(300 - user.points, 0)} pontos XP para emitir sua credencial digital corporativa.</p>
+            <div className="my-3 text-center p-4 rounded-xl bg-slate-50/50 border border-slate-200/60 space-y-1.5 font-mono">
+              <GraduationCap className="w-8 h-8 text-slate-400 mx-auto" />
+              <p className="text-[10px] text-slate-500 font-mono uppercase font-bold">Bloqueado • 300 XP Necessários</p>
+              <p className="text-[9px] text-slate-400 leading-normal">Faltam {Math.max(300 - user.points, 0)} pontos XP para emitir sua credencial digital corporativa.</p>
             </div>
           )}
 
-          <div className="text-[8px] font-mono text-neutral-500 flex justify-between select-none">
+          <div className="text-[8px] font-mono text-slate-400 flex justify-between select-none">
             <span>CHAVE: FIRJAN-SEC-ADMISS</span>
             <span>FIRJAN MATCH</span>
           </div>
@@ -167,20 +167,20 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
         {/* Course navigator module list (span 5) */}
-        <div className="lg:col-span-5 bg-[#0a0f21]/90 border border-[#1e293b] p-4 rounded-xl space-y-4 backdrop-blur-md shadow-xl">
+        <div className="lg:col-span-5 bg-white border border-slate-200/80 p-4 rounded-xl space-y-4 shadow-xs">
           
           {/* Admissional Checklist */}
-          <div className="p-3 bg-black border border-[#1e293b] rounded-xl space-y-2">
-            <span className="text-[10px] font-mono text-blue-300 uppercase block tracking-wider font-extrabold">Checklist Integrado Admissional</span>
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <span className="text-[10px] font-mono text-blue-600 uppercase block tracking-wider font-extrabold">Checklist Integrado Admissional</span>
             <div className="space-y-1.5 text-xs font-mono">
               {checklistTasks.map((task, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-[11px] text-neutral-400">
+                <div key={idx} className="flex items-center gap-2 text-[11px] text-slate-500">
                   <span className={`w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] ${
-                    task.checked ? 'bg-[#10b981] text-black font-extrabold' : 'border border-[#1e293b] bg-transparent'
+                    task.checked ? 'bg-emerald-600 text-white font-extrabold' : 'border border-slate-200 bg-transparent'
                   }`}>
                     {task.checked && "✓"}
                   </span>
-                  <span className={task.checked ? 'line-through text-neutral-500 font-mono' : 'text-neutral-300'}>{task.text}</span>
+                  <span className={task.checked ? 'line-through text-slate-400 font-mono' : 'text-slate-600'}>{task.text}</span>
                 </div>
               ))}
             </div>
@@ -188,7 +188,7 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
 
           {/* Module courses tabs */}
           <div className="space-y-1.5 overflow-y-auto max-h-[calc(100vh-420px)] pr-1">
-            <span className="text-[10px] font-mono text-[#10b981] uppercase block tracking-wider font-bold">Módulos Teóricos</span>
+            <span className="text-[10px] font-mono text-emerald-600 uppercase block tracking-wider font-bold">Módulos Teóricos</span>
             
             {modules.map((mod) => (
               <button
@@ -199,17 +199,17 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
                 }}
                 className={`w-full text-left p-3 rounded-xl border transition-all text-xs flex justify-between cursor-pointer ${
                   activeModule?.id === mod.id
-                    ? "bg-blue-950/15 border-blue-500/25 shadow-sm"
-                    : "bg-black/30 border-[#1e293b] hover:border-blue-500/15"
+                    ? "bg-blue-50/60 border-blue-200 shadow-2xs"
+                    : "bg-slate-50/50 border-slate-200 hover:border-blue-200"
                 }`}
               >
                 <div className="min-w-0 pr-3 space-y-1">
-                  <p className="font-semibold text-neutral-200 line-clamp-1">{mod.title}</p>
-                  <p className="text-[10px] text-neutral-500 font-mono uppercase">{mod.duration} • {mod.category}</p>
+                  <p className="font-semibold text-slate-700 line-clamp-1">{mod.title}</p>
+                  <p className="text-[10px] text-slate-450 font-mono uppercase">{mod.duration} • {mod.category}</p>
                 </div>
                 <div className="shrink-0 flex items-center">
                   <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
-                    mod.isCompleted ? 'bg-[#10b981] text-black font-extrabold' : 'border border-neutral-600'
+                    mod.isCompleted ? 'bg-emerald-600 text-white font-extrabold' : 'border border-slate-300'
                   }`}>
                     {mod.isCompleted ? "✓" : "▶"}
                   </span>
@@ -221,17 +221,17 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
         </div>
 
         {/* Active lesson screen (span 7) */}
-        <div className="lg:col-span-7 bg-[#0a0f21]/90 border border-[#1e293b] p-6 rounded-2xl flex flex-col justify-between backdrop-blur-md shadow-xl">
+        <div className="lg:col-span-7 bg-white border border-slate-200/80 p-6 rounded-2xl flex flex-col justify-between shadow-xs">
           {activeModule && activeLesson ? (
             <div className="space-y-5">
               
               {/* Header lesson */}
-              <div className="pb-3 border-b border-[#1e293b] space-y-1">
-                <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500">
-                  <span className="text-blue-300 uppercase bg-blue-950/20 border border-blue-500/15 font-bold rounded px-1.5 py-0.5">MÓDULO SELECIONADO</span>
+              <div className="pb-3 border-b border-slate-200 space-y-1">
+                <div className="flex justify-between items-center text-[9px] font-mono text-slate-400">
+                  <span className="text-blue-600 uppercase bg-blue-50 border border-blue-100 font-bold rounded px-1.5 py-0.5">MÓDULO SELECIONADO</span>
                   <span>{activeModule.duration} • {activeModule.category}</span>
                 </div>
-                <h3 className="text-md font-extrabold text-white mt-1">{activeModule.title}</h3>
+                <h3 className="text-md font-extrabold text-slate-800 mt-1">{activeModule.title}</h3>
               </div>
 
               {/* Lesson body structure */}
@@ -245,8 +245,8 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
                       onClick={() => setActiveLesson(les)}
                       className={`py-1.5 px-2 rounded-lg border text-[10px] font-mono text-center cursor-pointer transition-all ${
                         activeLesson.id === les.id
-                          ? "border-[#10b981] bg-emerald-950/15 text-[#10b981] font-bold"
-                          : "border-[#1e293b] bg-black/40 text-neutral-400 hover:text-white"
+                          ? "border-emerald-500 bg-emerald-50 text-emerald-700 font-bold"
+                          : "border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-800"
                       }`}
                     >
                       <span className="truncate">{les.title}</span> {les.isCompleted && "✓"}
@@ -254,29 +254,29 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
                   ))}
                 </div>
 
-                <div className="p-4 bg-black border border-[#1e293b] rounded-xl space-y-2 min-h-36">
-                  <h4 className="text-xs font-bold text-neutral-150 flex items-center gap-1 font-mono">
-                    <PlayCircle className="w-4 h-4 text-[#10b981]" />
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 min-h-36">
+                  <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1 font-mono">
+                    <PlayCircle className="w-4 h-4 text-emerald-600" />
                     {activeLesson.title}
                   </h4>
-                  <p className="text-xs text-neutral-300 leading-relaxed font-sans text-justify select-text">
+                  <p className="text-xs text-slate-600 leading-relaxed font-sans text-justify select-text">
                     {activeLesson.content}
                   </p>
                 </div>
               </div>
 
               {/* Module complete trigger */}
-              <div className="pt-4 border-t border-[#1e293b] flex justify-between items-center text-xs">
-                <span className="text-blue-300 font-mono text-[10px] font-bold">RECOMPENSA: +25 XP POR AULA</span>
+              <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-xs">
+                <span className="text-blue-600 font-mono text-[10px] font-bold">RECOMPENSA: +25 XP POR AULA</span>
 
                 {activeModule.lessons.find(l => l.id === activeLesson.id)?.isCompleted ? (
-                  <span className="text-[#10b981] text-xs font-mono font-bold flex items-center gap-1 bg-emerald-950/15 p-2 rounded-lg border border-emerald-500/20">
+                  <span className="text-emerald-700 text-xs font-mono font-bold flex items-center gap-1 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
                     <CheckCircle2 className="w-4 h-4" /> Aula Concluída sob Segurança
                   </span>
                 ) : (
                   <button
                     onClick={() => handleCompleteLessonBtn(activeModule.id, activeLesson.id)}
-                    className="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-500 hover:to-blue-600 text-xs font-extrabold font-mono uppercase tracking-wide transition-all cursor-pointer shadow-md"
+                    className="px-5 py-2 rounded-lg bg-[#003BD1] hover:bg-[#002cb3] text-white text-xs font-extrabold font-mono uppercase tracking-wide transition-all cursor-pointer shadow-sm"
                   >
                     Marcar como lido e ganhar XP
                   </button>
@@ -285,8 +285,8 @@ export default function OnboardingView({ user, onUserUpdate }: OnboardingViewPro
 
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center text-neutral-550 py-12">
-              <Rocket className="w-12 h-12 text-blue-450/20 mb-3 animate-pulse" />
+            <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 py-12">
+              <Rocket className="w-12 h-12 text-blue-500/20 mb-3 animate-pulse" />
               <p className="text-xs font-mono">Nenhum módulo selecionado na trilha de integração</p>
             </div>
           )}

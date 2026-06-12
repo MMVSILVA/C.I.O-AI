@@ -159,21 +159,21 @@ export default function ChatView({ user }: ChatViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] text-[#f4f4f5] font-sans animate-fade-in">
+    <div className="flex flex-col h-[calc(100vh-140px)] text-slate-800 font-sans animate-fade-in">
       
       {/* Header Banner */}
-      <div className="flex justify-between items-center bg-[#0a0f21]/90 p-4 border border-[#1e293b] rounded-2xl mb-4 backdrop-blur-md shrink-0 shadow-xl">
+      <div className="flex justify-between items-center bg-white p-4 border border-slate-200 rounded-2xl mb-4 shrink-0 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-950/25 border border-blue-500/20 flex items-center justify-center">
-            <Cpu className="w-5 h-5 text-[#3b82f6]" />
+          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-[#003BD1]/10 flex items-center justify-center">
+            <Cpu className="w-5 h-5 text-[#003BD1]" />
           </div>
           <div>
-            <h2 className="text-sm font-bold flex items-center gap-1.5 text-white font-sans">
+            <h2 className="text-sm font-bold flex items-center gap-1.5 text-slate-850 font-sans">
               Firjan IA Copiloto
-              <Sparkles className="w-4.5 h-4.5 text-[#f29900]" />
+              <Sparkles className="w-4.5 h-4.5 text-amber-500" />
             </h2>
-            <p className="text-[10px] text-neutral-400 font-mono flex items-center gap-1 font-bold">
-              <span className="w-1.5 h-1.5 bg-[#3b82f6] rounded-full animate-ping" />
+            <p className="text-[10px] text-slate-500 font-mono flex items-center gap-1 font-bold">
+              <span className="w-1.5 h-1.5 bg-[#003BD1] rounded-full" />
               Modelo: Gemini 3.5-Flash RAG Ativo
             </p>
           </div>
@@ -182,7 +182,7 @@ export default function ChatView({ user }: ChatViewProps) {
         <button 
           onClick={handleResetChat}
           title="Nova Conversa"
-          className="p-2 px-3.5 rounded-lg border border-[#1e293b] hover:border-red-500/30 hover:bg-red-950/20 text-xs font-mono text-neutral-400 hover:text-red-350 transition-all cursor-pointer flex items-center gap-1.5"
+          className="p-2 px-3.5 rounded-lg border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-250 text-xs font-mono text-slate-500 transition-all cursor-pointer flex items-center gap-1.5"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           Limpar Conversa
@@ -202,12 +202,12 @@ export default function ChatView({ user }: ChatViewProps) {
             <div 
               className={`max-w-[85%] rounded-2xl p-4 border transition-all ${
                 msg.role === 'user'
-                  ? "bg-blue-950/15 border-blue-500/25 text-white shadow-sm"
-                  : "bg-black/30 border-[#1e293b] text-neutral-100 leading-relaxed font-normal shadow-md"
+                  ? "bg-blue-50/80 border-blue-200 text-slate-800 shadow-xs"
+                  : "bg-white border-slate-200 text-slate-700 leading-relaxed font-normal shadow-sm"
               }`}
             >
               {/* Message Meta Info */}
-              <div className="flex items-center gap-2 mb-2 text-[10px] font-mono text-neutral-500 justify-between">
+              <div className={`flex items-center gap-2 mb-2 text-[10px] font-mono justify-between ${msg.role === 'user' ? 'text-[#003BD1]/80' : 'text-slate-400'}`}>
                 <span className="font-extrabold uppercase tracking-wide flex items-center gap-1">
                   {msg.role === 'user' ? "Você (Funcionário)" : "Firjan IA Assistente"}
                 </span>
@@ -215,20 +215,20 @@ export default function ChatView({ user }: ChatViewProps) {
               </div>
 
               {/* Msg Content */}
-              <div className="whitespace-pre-wrap text-sm text-neutral-200">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed">
                 {msg.text}
               </div>
 
               {/* Grounding references link */}
               {msg.documentGrounding && (
-                <div className="mt-3.5 pt-2 border-t border-[#1e1e24] space-y-1.5">
-                  <p className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1 font-bold">
-                    <BookOpen className="w-3 h-3 text-[#10b981]" /> Fonte Base Corporativa Sincronizada:
+                <div className="mt-3.5 pt-2 border-t border-slate-100 space-y-1.5">
+                  <p className="text-[10px] font-mono text-emerald-600 uppercase tracking-widest flex items-center gap-1 font-bold">
+                    <BookOpen className="w-3 h-3 text-emerald-600" /> Fonte Base Corporativa Sincronizada:
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {msg.documentGrounding.map((g, gi) => (
-                      <span key={gi} className="text-[10px] bg-[#050505] border border-emerald-500/15 text-[#10b981] px-2.5 py-0.5 rounded flex items-center gap-1 font-mono font-bold">
-                        <FileText className="w-3 h-3 text-[#10b981]" />
+                      <span key={gi} className="text-[10px] bg-emerald-50 border border-emerald-150 text-emerald-700 px-2.5 py-0.5 rounded-lg flex items-center gap-1 font-mono font-bold shadow-2xs">
+                        <FileText className="w-3 h-3 text-emerald-600" />
                         {g}
                       </span>
                     ))}
@@ -242,17 +242,17 @@ export default function ChatView({ user }: ChatViewProps) {
         {/* Training dynamic loaders */}
         {isTraining && (
           <div className="flex justify-start">
-            <div className="bg-[#050505] border border-[#10b981]/25 rounded-2xl p-4 max-w-sm space-y-2 shadow-xl">
+            <div className="bg-white border border-emerald-200 rounded-2xl p-4 max-w-sm space-y-2 shadow-sm">
               <div className="flex justify-between text-xs font-mono">
-                <span className="text-[#10b981] animate-pulse flex items-center gap-1.5 font-bold">
-                  <CloudLightning className="w-4 h-4" />
+                <span className="text-emerald-600 animate-pulse flex items-center gap-1.5 font-bold">
+                  <CloudLightning className="w-4 h-4 text-emerald-500" />
                   Minerando OCR Corporativo Inteligente...
                 </span>
-                <span>{trainingProgress}%</span>
+                <span className="text-slate-600">{trainingProgress}%</span>
               </div>
-              <p className="text-[10px] text-neutral-400 truncate">{trainingFile?.name}</p>
-              <div className="w-full h-1 bg-[#0a0f21] border border-[#1e293b] rounded-full overflow-hidden p-0.5">
-                <div className="h-full bg-gradient-to-r from-blue-600 to-[#10b981] rounded-full" style={{ width: `${trainingProgress}%` }} />
+              <p className="text-[10px] text-slate-500 truncate">{trainingFile?.name}</p>
+              <div className="w-full h-1.5 bg-slate-100 border border-slate-200 rounded-full overflow-hidden p-0.5">
+                <div className="h-full bg-gradient-to-r from-[#003BD1] to-emerald-500 rounded-full" style={{ width: `${trainingProgress}%` }} />
               </div>
             </div>
           </div>
@@ -261,8 +261,8 @@ export default function ChatView({ user }: ChatViewProps) {
         {/* Standard AI response loader */}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-[#0a0f21]/90 border border-[#1e293b] rounded-2xl p-4 w-48 text-center text-xs font-mono text-neutral-400 flex items-center justify-center gap-2 shadow-lg">
-              <span className="w-2 h-2 rounded-full bg-[#10b981] animate-bounce" />
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 w-48 text-center text-xs font-mono text-slate-500 flex items-center justify-center gap-2 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" />
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:0.2s]" />
               <span className="w-2 h-2 rounded-full bg-blue-300 animate-bounce [animation-delay:0.4s]" />
               Gerando resposta...
@@ -273,9 +273,9 @@ export default function ChatView({ user }: ChatViewProps) {
 
       {/* Suggested prompts list panel if no messages are present yet, or helper trigger */}
       {messages.length <= 1 && !loading && (
-        <div className="p-4 rounded-xl bg-blue-950/10 border border-blue-500/10 mb-4 shrink-0 shadow-sm">
-          <p className="text-xs font-mono text-blue-300 mb-2 flex items-center gap-1.5 font-bold">
-            <HelpCircle className="w-3.5 h-3.5 text-[#3b82f6]" />
+        <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-100 mb-4 shrink-0 shadow-xs">
+          <p className="text-xs font-sans text-[#003BD1] mb-2.5 flex items-center gap-1.5 font-bold">
+            <HelpCircle className="w-4 h-4 text-[#003BD1]" />
             Para começar, clique em uma das sugestões ou faça perguntas sobre a Firjan 2026:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
@@ -283,10 +283,10 @@ export default function ChatView({ user }: ChatViewProps) {
               <button
                 key={i}
                 onClick={() => handleSendMessage(sug)}
-                className="text-left py-2 px-3 rounded-lg bg-black border border-[#1e293b] hover:border-blue-500/35 hover:bg-neutral-900/10 text-neutral-300 transition-all cursor-pointer flex items-center justify-between"
+                className="text-left py-2.5 px-3.5 rounded-xl bg-white border border-slate-200 hover:border-[#003BD1] hover:text-[#003BD1] text-slate-700 transition-all cursor-pointer flex items-center justify-between font-medium shadow-2xs"
               >
                 <span>{sug}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-neutral-500" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
               </button>
             ))}
           </div>
@@ -296,10 +296,10 @@ export default function ChatView({ user }: ChatViewProps) {
       {/* Input panel prompt box */}
       <form 
         onSubmit={(e) => { e.preventDefault(); handleSendMessage(input); }}
-        className="flex gap-2.5 items-center bg-[#0a0f21]/90 p-3 rounded-2xl border border-[#1e293b] backdrop-blur-md shrink-0 shadow-xl"
+        className="flex gap-2.5 items-center bg-white p-3 rounded-2xl border border-slate-200 shrink-0 shadow-sm"
       >
         {/* Document attachment integration */}
-        <label className="p-2.5 rounded-xl border border-[#1e293b] hover:border-blue-500/20 hover:bg-white/5 text-neutral-400 hover:text-white transition-all cursor-pointer">
+        <label className="p-2.5 rounded-xl border border-slate-250 hover:border-slate-350 hover:bg-slate-50 text-slate-550 transition-all cursor-pointer">
           <Paperclip className="w-4.5 h-4.5" />
           <input 
             type="file" 
@@ -314,14 +314,14 @@ export default function ChatView({ user }: ChatViewProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Pergunte ao Firjan IA... (ex: Qual o prazo da Firjan ou MFA?)"
-          className="flex-1 bg-transparent py-2 px-1 focus:outline-none text-sm text-[#f4f4f5] placeholder-neutral-500"
+          className="flex-1 bg-transparent py-2 px-1 focus:outline-none text-sm text-slate-800 placeholder-slate-400"
           disabled={loading || isTraining}
         />
 
         <button 
           type="submit"
           disabled={loading || isTraining || !input.trim()}
-          className="p-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:hover:bg-blue-600 rounded-xl transition-all cursor-pointer shrink-0 shadow"
+          className="p-3 bg-[#003BD1] hover:bg-[#002cb3] disabled:opacity-30 disabled:hover:bg-[#003BD1] rounded-xl transition-all cursor-pointer shrink-0 shadow"
         >
           <Send className="w-4 h-4 text-white" />
         </button>
